@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import logging
 import os
 import urllib
 from google.appengine.api import users
@@ -53,7 +54,11 @@ class MainPage(webapp2.RequestHandler):
         #if memcache is none:
         if greetings is None:
             greetings = greetings_query.fetch(10)
-
+            if not memcache.add('%s:greetings' %guestbook_name, greetings, 10000):
+                logging.error('Memcache set failed')
+            logging.warning("=====================KHONG DUNG CACHE=====================")
+        else:
+            logging.warning("=====================DUNG CACHE=====================")
 
         if users.get_current_user():
             url = users.create_logout_url(self.request.uri)
@@ -71,7 +76,6 @@ class MainPage(webapp2.RequestHandler):
 
         template = JINJA_ENVIRONMENT.get_template('templates/index.html')
         self.response.write(template.render(template_values))
-
 #Guestbook
 class Guestbook(webapp2.RequestHandler):
     def post(self):
@@ -85,11 +89,7 @@ class Guestbook(webapp2.RequestHandler):
         greeting.content = self.request.get('content')
 
         if greeting.put():
-            greetings_query = Greeting.query(
-                ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
-            greetings = greetings_query.fetch(10)
-            memcache.flush_all() #show all greeting
-            memcache.add('%s:greetings' %guestbook_name, greetings, 86400) # then cache new greetings for the next time
+            memcache.delete("%s:greetings" %guestbook_name)
 
         query_params = {'guestbook_name': guestbook_name}
         self.redirect('/?' + urllib.urlencode(query_params))
