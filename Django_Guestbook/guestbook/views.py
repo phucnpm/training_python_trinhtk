@@ -9,7 +9,8 @@ import urllib
 def main_page(request):
     guestbook_name = request.GET.get('guestbook_name', 'default_guestbook')
     guestbook_key = Greeting.get_key_from_name(guestbook_name)
-    greetings_query = Greeting.all().ancestor(guestbook_key).order('-date')
+    greetings_query = Greeting.query(
+            ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
     greetings = greetings_query.fetch(10)
 
     if users.get_current_user():

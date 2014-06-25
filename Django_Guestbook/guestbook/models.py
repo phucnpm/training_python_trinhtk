@@ -1,11 +1,11 @@
 from django.db import models
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 # Create your models here.
-class Greeting(db.Model):
+class Greeting(ndb.Model):
     #variables
-    author = db.StringProperty()
-    content = db.StringProperty(multiline=True)
-    date = db.DateTimeProperty(auto_now_add=True)
+    author = ndb.StringProperty()
+    content = ndb.StringProperty()
+    date = ndb.DateTimeProperty(auto_now_add=True)
     @classmethod
     def get_key_from_name(cls, guestbook_name):
-        return db.Key.from_path('Guestbook', guestbook_name or 'default_guestbook')
+        return ndb.Key('Guestbook', guestbook_name or 'default_guestbook')
