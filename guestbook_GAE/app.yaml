@@ -8,12 +8,13 @@ handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
+  #Xác định thư mục tĩnh stylesheets
 - url: /stylesheets
   static_dir: stylesheets
-
+  #Xác định script là main.py -> app
 - url: .*
   script: main.app
-
+  #Thêm các thư viện với pban mới nhất
 libraries:
 - name: webapp2
   version: latest
