@@ -48,11 +48,11 @@ class MainPage(webapp2.RequestHandler):
         guestbook_name = self.request.get('guestbook_name',
                                           DEFAULT_GUESTBOOK_NAME)
         greetings_query = Greeting.query(
-            ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
+                ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
         greetings = memcache.get('%s:greetings' %guestbook_name)
+        #if memcache is none:
         if greetings is None:
             greetings = greetings_query.fetch(10)
-            memcache.add('%s:greetings' %guestbook_name, greetings, 10)
 
 
         if users.get_current_user():
@@ -84,7 +84,12 @@ class Guestbook(webapp2.RequestHandler):
 
         greeting.content = self.request.get('content')
 
-        greeting.put()
+        if greeting.put():
+            greetings_query = Greeting.query(
+                ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
+            greetings = greetings_query.fetch(10)
+            memcache.flush_all() #show all greeting
+            memcache.add('%s:greetings' %guestbook_name, greetings, 86400) # then cache new greetings for the next time
 
         query_params = {'guestbook_name': guestbook_name}
         self.redirect('/?' + urllib.urlencode(query_params))
