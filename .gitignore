@@ -1,2 +1,7 @@
 *.pyc
 */idea/*
+guestbook_GAE/.idea/.name
+
+*.xml
+
+*.iml

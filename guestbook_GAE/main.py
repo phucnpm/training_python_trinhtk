@@ -33,14 +33,15 @@ class MainPage(webapp2.RequestHandler):
         #guestbook_name get from field 'guestbook_name' or default = DEFAULT_GUESTBOOK_NAME
         guestbook_name = self.request.get('guestbook_name',
                                           DEFAULT_GUESTBOOK_NAME)
-        #Query get data of greetings whose ancestor is key of current guestbook, sort desc by date
-        greetings_query = Greeting.query(
-                ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
+
         #Get data from memcache of current guestbook then assign this result for greetings
         greetings = memcache.get('%s:greetings' %guestbook_name)
         #If memcache does not exist:
         if greetings is None:
             #Get data from database
+            #Query get data of greetings whose ancestor is key of current guestbook, sort desc by date
+            greetings_query = Greeting.query(
+                ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
             greetings = greetings_query.fetch(10)
             #Then cache these data, if app can't cache, give an error message
             if not memcache.add('%s:greetings' %guestbook_name, greetings, 10000):
