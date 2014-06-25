@@ -1,7 +1,4 @@
 *.pyc
-*/idea/*
-guestbook_GAE/.idea/.name
+#Pycharm files
+*/.idea/*
 
-*.xml
-
-*.iml
