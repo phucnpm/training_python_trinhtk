@@ -10,13 +10,8 @@ import urllib
 
 
 
-class TemplateView(TemplateResponseMixin, ContextMixin, View):
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        return self.render_to_response(context)
-    def post(self, request):
-        return HttpResponseRedirect('/')
-class IndexView(TemplateView):
+
+class IndexView(TemplateResponseMixin, ContextMixin, View):
         template_name = "guestbook/mainpage.html"
         def get(self, request, *args, **kwargs):
              #guestbook_name get from field 'guestbook_name' or default = default_guestbook
@@ -52,9 +47,10 @@ class IndexView(TemplateView):
             kwargs['guestbook_name'] = guestbook_name
             kwargs['url'] = url
             kwargs['url_linktext']=url_linktext
-            return super(IndexView, self).get(request, *args, **kwargs)
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
              #render template
-class SignView(TemplateView):
+class SignView(TemplateResponseMixin, ContextMixin, View):
         template_name = "guestbook/mainpage.html"
         def post(self, request):
             if request.method == 'POST':
@@ -69,4 +65,4 @@ class SignView(TemplateView):
                 if greeting.put():
                     memcache.delete("%s:greetings" %guestbook_name)
                 return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
-            return super(SignView, self).post(request)
+            return HttpResponseRedirect('/')
