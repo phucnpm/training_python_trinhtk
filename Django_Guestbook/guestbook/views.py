@@ -12,12 +12,10 @@ import urllib
 class IndexView(TemplateView):
 
         template_name = "guestbook/mainpage.html"
-
         #Methode get data from database
         def get_queryset(self, guestbook_name):
             return Greeting.query(
                     ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
-
         def get_context_data(self, **kwargs):
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
             greetings = memcache.get("%s:greetings" %guestbook_name)
@@ -46,7 +44,6 @@ class IndexView(TemplateView):
 class SignView(TemplateView):
 
         template_name = "guestbook/mainpage.html"
-
         def post(self, request, *args, **kwargs):
             #When user signs into guestbook, these following code will help to update greeting's information
             guestbook_name = request.POST.get('guestbook_name')
