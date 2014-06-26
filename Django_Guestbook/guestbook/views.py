@@ -14,43 +14,36 @@ import urllib
 class IndexView(TemplateResponseMixin, ContextMixin, View):
         template_name = "guestbook/mainpage.html"
         def get(self, request, *args, **kwargs):
-             #guestbook_name get from field 'guestbook_name' or default = default_guestbook
-            guestbook_name = request.GET.get('guestbook_name', 'default_guestbook')
-
-            #Get data from memcache of current guestbook then assign this result for greetings
-
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        #Methode get data from database
+        def get_queryset(self, guestbook_name):
+            return Greeting.query(
+                    ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
+        def get_context_data(self, **kwargs):
+            guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
             greetings = memcache.get("%s:greetings" %guestbook_name)
-            #If memcache does not exist:
             if greetings is None:
                 #Get data from database
                 greetings = self.get_queryset(guestbook_name).fetch(10)
                 #Then cache these data, if app can't cache, give an error message
                 if not memcache.add("%s:greetings" %guestbook_name, greetings, 10000):
                     logging.error("Memcache set failed")
+            context = super(IndexView,self).get_context_data(**kwargs)
             #Check whether user loged in
             if users.get_current_user():
                 #Create link logout & text
-                url = users.create_logout_url(request.get_full_path())
+                url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Logout'
-            #Else
             else:
                 #Create link login & text
-                url = users.create_login_url(request.get_full_path())
+                url = users.create_logout_url(self.request.get_full_path())
                 url_linktext = 'Login'
-            #context variables:
-
-            context = self.get_context_data(greetings, guestbook_name, url, url_linktext, **kwargs)
-            return self.render_to_response(context)
-        #Methode get data from database
-        def get_queryset(self, guestbook_name):
-            return Greeting.query(
-                    ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
-        def get_context_data(self, greetings, guestbook_name, url, url_linktext ,**kwargs):
-            kwargs['greetings'] = greetings
-            kwargs['guestbook_name'] = guestbook_name
-            kwargs['url'] = url
-            kwargs['url_linktext']=url_linktext
-            return kwargs
+            context['greetings'] = greetings
+            context['guestbook_name'] = guestbook_name
+            context['url'] = url
+            context['url_linktext']= url_linktext
+            return context
 
 
 class SignView(TemplateResponseMixin, ContextMixin, View):
