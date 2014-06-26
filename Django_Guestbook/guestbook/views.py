@@ -34,11 +34,11 @@ class IndexView(TemplateView):
             #Check whether user loged in
             if users.get_current_user():
                 #Create link logout & text
-                url = users.create_login_url(self.request.get_full_path())
+                url = users.create_logout_url(self.request.get_full_path())
                 url_linktext = 'Logout'
             else:
                 #Create link login & text
-                url = users.create_logout_url(self.request.get_full_path())
+                url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
             context['greetings'] = greetings
             context['guestbook_name'] = guestbook_name
