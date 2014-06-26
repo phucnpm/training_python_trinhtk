@@ -38,31 +38,32 @@ class IndexView(TemplateResponseMixin, ContextMixin, View):
                 url = users.create_login_url(request.get_full_path())
                 url_linktext = 'Login'
             #context variables:
-            kwargs['greetings'] = greetings
-            kwargs['guestbook_name'] = guestbook_name
-            kwargs['url'] = url
-            kwargs['url_linktext']=url_linktext
-            context = self.get_context_data(**kwargs)
+
+            context = self.get_context_data(greetings, guestbook_name, url, url_linktext, **kwargs)
             return self.render_to_response(context)
         #Methode get data from database
         def get_queryset(self, guestbook_name):
             return Greeting.query(
                     ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
+        def get_context_data(self, greetings, guestbook_name, url, url_linktext ,**kwargs):
+            kwargs['greetings'] = greetings
+            kwargs['guestbook_name'] = guestbook_name
+            kwargs['url'] = url
+            kwargs['url_linktext']=url_linktext
+            return kwargs
 
-             #render template
+
 class SignView(TemplateResponseMixin, ContextMixin, View):
         template_name = "guestbook/mainpage.html"
-        def post(self, request):
-            if request.method == 'POST':
+        def post(self, request, *args, **kwargs):
     #When user signs into guestbook, these following code will help to update greeting's information
-                guestbook_name = request.POST.get('guestbook_name')
-                guestbook_key = Greeting.get_key_from_name(guestbook_name)
-                greeting = Greeting(parent=guestbook_key)
-                if users.get_current_user():
-                    greeting.author = users.get_current_user().nickname()
-                greeting.content = request.POST.get('content')
+            guestbook_name = request.POST.get('guestbook_name')
+            guestbook_key = Greeting.get_key_from_name(guestbook_name)
+            greeting = Greeting(parent=guestbook_key)
+            if users.get_current_user():
+                greeting.author = users.get_current_user().nickname()
+            greeting.content = request.POST.get('content')
             #After put this greeting, clear cache
-                if greeting.put():
-                    memcache.delete("%s:greetings" %guestbook_name)
-                return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
-            return HttpResponseRedirect('/')
+            if greeting.put():
+                memcache.delete("%s:greetings" %guestbook_name)
+            return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
