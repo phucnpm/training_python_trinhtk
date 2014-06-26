@@ -1,8 +1,9 @@
 # Create your views here.
 import logging
+from django.contrib.databrowse.plugins.calendars import IndexView
 
 from django.http import HttpResponseRedirect
-from django.views.generic.base import TemplateResponseMixin, ContextMixin, View
+from django.views.generic.base import TemplateResponseMixin, ContextMixin, View, TemplateView
 from google.appengine.api import users
 from guestbook.models import Greeting
 from google.appengine.api import  memcache
@@ -11,11 +12,44 @@ import urllib
 
 
 
-class IndexView(TemplateResponseMixin, ContextMixin, View):
+# class IndexView(TemplateResponseMixin, ContextMixin, View):
+#         template_name = "guestbook/mainpage.html"
+#
+#         def get(self, request, *args, **kwargs):
+#             context = self.get_context_data(**kwargs)
+#             return self.render_to_response(context)
+#
+#         #Methode get data from database
+#         def get_queryset(self, guestbook_name):
+#             return Greeting.query(
+#                     ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
+#         def get_context_data(self, **kwargs):
+#             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
+#             greetings = memcache.get("%s:greetings" %guestbook_name)
+#             if greetings is None:
+#                 #Get data from database
+#                 greetings = self.get_queryset(guestbook_name).fetch(10)
+#                 #Then cache these data, if app can't cache, give an error message
+#                 if not memcache.add("%s:greetings" %guestbook_name, greetings, 10000):
+#                     logging.error("Memcache set failed")
+#             context = super(IndexView,self).get_context_data(**kwargs)
+#             #Check whether user loged in
+#             if users.get_current_user():
+#                 #Create link logout & text
+#                 url = users.create_login_url(self.request.get_full_path())
+#                 url_linktext = 'Logout'
+#             else:
+#                 #Create link login & text
+#                 url = users.create_logout_url(self.request.get_full_path())
+#                 url_linktext = 'Login'
+#             context['greetings'] = greetings
+#             context['guestbook_name'] = guestbook_name
+#             context['url'] = url
+#             context['url_linktext']= url_linktext
+#             return context
+
+class IndexView(TemplateView):
         template_name = "guestbook/mainpage.html"
-        def get(self, request, *args, **kwargs):
-            context = self.get_context_data(**kwargs)
-            return self.render_to_response(context)
         #Methode get data from database
         def get_queryset(self, guestbook_name):
             return Greeting.query(
@@ -44,9 +78,7 @@ class IndexView(TemplateResponseMixin, ContextMixin, View):
             context['url'] = url
             context['url_linktext']= url_linktext
             return context
-
-
-class SignView(TemplateResponseMixin, ContextMixin, View):
+class SignView(TemplateView):
         template_name = "guestbook/mainpage.html"
         def post(self, request, *args, **kwargs):
     #When user signs into guestbook, these following code will help to update greeting's information
