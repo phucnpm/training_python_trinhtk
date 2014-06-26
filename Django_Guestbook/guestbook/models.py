@@ -1,4 +1,3 @@
-from django.db import models
 from google.appengine.ext import ndb
 # Create your models here.
 class Greeting(ndb.Model):
