@@ -47,25 +47,27 @@ import urllib
 #     }
 #      #render template
 #     return render(request, 'guestbook/mainpage.html', template_values)
-def sign_post(request):
-    if request.method == 'POST':
-    #When user signs into guestbook, these following code will help to update greeting's information
-        guestbook_name = request.POST.get('guestbook_name')
-        guestbook_key = Greeting.get_key_from_name(guestbook_name)
-        greeting = Greeting(parent=guestbook_key)
-        if users.get_current_user():
-            greeting.author = users.get_current_user().nickname()
-        greeting.content = request.POST.get('content')
-    #After put this greeting, clear cache
-        if greeting.put():
-            memcache.delete("%s:greetings" %guestbook_name)
-        return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
-    return HttpResponseRedirect('/')
+# def sign_post(request):
+#     if request.method == 'POST':
+#     #When user signs into guestbook, these following code will help to update greeting's information
+#         guestbook_name = request.POST.get('guestbook_name')
+#         guestbook_key = Greeting.get_key_from_name(guestbook_name)
+#         greeting = Greeting(parent=guestbook_key)
+#         if users.get_current_user():
+#             greeting.author = users.get_current_user().nickname()
+#         greeting.content = request.POST.get('content')
+#     #After put this greeting, clear cache
+#         if greeting.put():
+#             memcache.delete("%s:greetings" %guestbook_name)
+#         return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
+#     return HttpResponseRedirect('/')
 
 class TemplateView(TemplateResponseMixin, ContextMixin, View):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         return self.render_to_response(context)
+    def post(self, request):
+        return HttpResponseRedirect('/')
 class IndexView(TemplateView):
         template_name = "guestbook/mainpage.html"
         def get(self, request, *args, **kwargs):
@@ -104,3 +106,19 @@ class IndexView(TemplateView):
             kwargs['url_linktext']=url_linktext
             return super(IndexView, self).get(request, *args, **kwargs)
              #render template
+class SignView(TemplateView):
+        template_name = "guestbook/mainpage.html"
+        def post(self, request):
+            if request.method == 'POST':
+    #When user signs into guestbook, these following code will help to update greeting's information
+                guestbook_name = request.POST.get('guestbook_name')
+                guestbook_key = Greeting.get_key_from_name(guestbook_name)
+                greeting = Greeting(parent=guestbook_key)
+                if users.get_current_user():
+                    greeting.author = users.get_current_user().nickname()
+                greeting.content = request.POST.get('content')
+            #After put this greeting, clear cache
+                if greeting.put():
+                    memcache.delete("%s:greetings" %guestbook_name)
+                return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
+            return super(SignView, self).post(request)
