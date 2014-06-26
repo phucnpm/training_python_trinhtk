@@ -49,7 +49,6 @@ class IndexView(TemplateResponseMixin, ContextMixin, View):
             return Greeting.query(
                     ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
 
-             #render template
 class SignView(TemplateResponseMixin, ContextMixin, View):
         template_name = "guestbook/mainpage.html"
         def post(self, request):
