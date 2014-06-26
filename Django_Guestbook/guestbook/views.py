@@ -17,18 +17,13 @@ class IndexView(TemplateResponseMixin, ContextMixin, View):
              #guestbook_name get from field 'guestbook_name' or default = default_guestbook
             guestbook_name = request.GET.get('guestbook_name', 'default_guestbook')
 
-            guestbook_key = Greeting.get_key_from_name(guestbook_name)
-
             #Get data from memcache of current guestbook then assign this result for greetings
 
             greetings = memcache.get("%s:greetings" %guestbook_name)
             #If memcache does not exist:
             if greetings is None:
                 #Get data from database
-                #Query get data of greetings whose ancestor is key of current guestbook, sort desc by date
-                greetings_query = Greeting.query(
-                    ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
-                greetings = greetings_query.fetch(10)
+                greetings = self.get_queryset(guestbook_name).fetch(10)
                 #Then cache these data, if app can't cache, give an error message
                 if not memcache.add("%s:greetings" %guestbook_name, greetings, 10000):
                     logging.error("Memcache set failed")
@@ -49,6 +44,11 @@ class IndexView(TemplateResponseMixin, ContextMixin, View):
             kwargs['url_linktext']=url_linktext
             context = self.get_context_data(**kwargs)
             return self.render_to_response(context)
+        #Methode get data from database
+        def get_queryset(self, guestbook_name):
+            return Greeting.query(
+                    ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
+
              #render template
 class SignView(TemplateResponseMixin, ContextMixin, View):
         template_name = "guestbook/mainpage.html"
