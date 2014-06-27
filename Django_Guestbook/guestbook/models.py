@@ -1,3 +1,4 @@
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
 # Create your models here.
 DEFAULT_NAME = 'default_guestbook'
@@ -17,7 +18,9 @@ class Guestbook(ndb.Model):
                     ancestor= self.get_key()).order(-Greeting.date).fetch(count)
     def put_greeting(self, author, content):
         greeting = Greeting(parent=self.get_key(), author= author, content= content)
-        return greeting
+        if greeting.put():
+            memcache.delete("%s:greetings" %self.name)
+
     @classmethod
     def get_default_name(cls):
         return DEFAULT_NAME

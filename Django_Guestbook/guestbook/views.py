@@ -51,10 +51,9 @@ class SignView(TemplateView):
             guestbook_name = request.POST.get('guestbook_name')
             myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
-                greeting = myGuestbook.put_greeting(users.get_current_user().nickname(), request.POST.get('content'))
+                myGuestbook.put_greeting(users.get_current_user().nickname(), request.POST.get('content'))
             else:
-                greeting = myGuestbook.put_greeting(None, request.POST.get('content'))
+                myGuestbook.put_greeting(None, request.POST.get('content'))
             #After put this greeting, clear cache
-            if greeting.put():
-                memcache.delete("%s:greetings" %guestbook_name)
+
             return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
