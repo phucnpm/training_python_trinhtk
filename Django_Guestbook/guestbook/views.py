@@ -4,7 +4,7 @@ from django.contrib.databrowse.plugins.calendars import IndexView
 from django.http import HttpResponseRedirect
 from django.views.generic.base import TemplateView
 from google.appengine.api import users
-from guestbook.models import Greeting
+from guestbook.models import Greeting, Guestbook
 from google.appengine.api import memcache
 import urllib
 
@@ -23,13 +23,13 @@ class IndexView(TemplateView):
         def get_context_data(self, **kwargs):
 
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
-            guestbook_key = Greeting.get_key_from_name(guestbook_name)
-            greetings = memcache.get("%s:greetings" %guestbook_name)
+            myGuestbook = Guestbook(name= guestbook_name)
+            greetings = memcache.get("%s:greetings" %myGuestbook.name)
             if greetings is None:
                 #Get data from database
-                greetings = self.get_queryset(guestbook_key).fetch(10)
+                greetings = self.get_queryset(myGuestbook.get_key(myGuestbook.name)).fetch(10)
                 #Then cache these data, if app can't cache, give an error message
-                if not memcache.add("%s:greetings" %guestbook_name, greetings, 10000):
+                if not memcache.add("%s:greetings" %myGuestbook.name, greetings, 10000):
                     logging.error("Memcache set failed")
             context = super(IndexView,self).get_context_data(**kwargs)
             #Check whether user loged in
@@ -42,7 +42,7 @@ class IndexView(TemplateView):
                 url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
             context['greetings'] = greetings
-            context['guestbook_name'] = guestbook_name
+            context['guestbook_name'] = myGuestbook.name
             context['url'] = url
             context['url_linktext']= url_linktext
             return context
@@ -56,11 +56,11 @@ class SignView(TemplateView):
 
             #When user signs into guestbook, these following code will help to update greeting's information
             guestbook_name = request.POST.get('guestbook_name')
-            greeting = Greeting(parent=Greeting.get_key_from_name(guestbook_name))
+            myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
-                greeting.Update_Info(request.POST.get('content'), users.get_current_user().nickname())
+                greeting = Greeting(parent=myGuestbook.get_key(myGuestbook.name), author= users.get_current_user().nickname(), content=request.POST.get('content'))
             else:
-                greeting.Update_Info(request.POST.get('content'), None)
+               greeting = Greeting(parent=myGuestbook.get_key(myGuestbook.name), author= None, content=request.POST.get('content'))
             #After put this greeting, clear cache
             if greeting.put():
                 memcache.delete("%s:greetings" %guestbook_name)
