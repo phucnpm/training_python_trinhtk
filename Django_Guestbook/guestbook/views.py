@@ -1,12 +1,12 @@
 # Create your views here.
 import logging
+import urllib
+from google.appengine.api import users
+from google.appengine.api import memcache
 from django.contrib.databrowse.plugins.calendars import IndexView
 from django.http import HttpResponseRedirect
 from django.views.generic.base import TemplateView
-from google.appengine.api import users
-from guestbook.models import Greeting
-from google.appengine.api import memcache
-import urllib
+from guestbook.models import Greeting, Guestbook
 
 
 class IndexView(TemplateView):
@@ -14,34 +14,29 @@ class IndexView(TemplateView):
 
         template_name = "guestbook/mainpage.html"
         #Methode get data from database
-
-        def get_queryset(self, guestbook_name):
-
-            return Greeting.query(
-                    ancestor=Greeting.get_key_from_name(guestbook_name)).order(-Greeting.date)
-
+        DEFAULT_PAGE_SIZE = 10
         def get_context_data(self, **kwargs):
-
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
-            greetings = memcache.get("%s:greetings" %guestbook_name)
+            myGuestbook = Guestbook(name= guestbook_name)
+            greetings = memcache.get("%s:greetings" %myGuestbook.name)
             if greetings is None:
                 #Get data from database
-                greetings = self.get_queryset(guestbook_name).fetch(10)
+                greetings = myGuestbook.get_latest(self.DEFAULT_PAGE_SIZE)
                 #Then cache these data, if app can't cache, give an error message
-                if not memcache.add("%s:greetings" %guestbook_name, greetings, 10000):
+                if not memcache.add("%s:greetings" %myGuestbook.name, greetings, 10000):
                     logging.error("Memcache set failed")
             context = super(IndexView,self).get_context_data(**kwargs)
             #Check whether user loged in
             if users.get_current_user():
                 #Create link logout & text
-                url = users.create_login_url(self.request.get_full_path())
+                url = users.create_logout_url(self.request.get_full_path())
                 url_linktext = 'Logout'
             else:
                 #Create link login & text
-                url = users.create_logout_url(self.request.get_full_path())
+                url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
             context['greetings'] = greetings
-            context['guestbook_name'] = guestbook_name
+            context['guestbook_name'] = myGuestbook.name
             context['url'] = url
             context['url_linktext']= url_linktext
             return context
@@ -52,15 +47,13 @@ class SignView(TemplateView):
         template_name = "guestbook/mainpage.html"
         
         def post(self, request, *args, **kwargs):
-
             #When user signs into guestbook, these following code will help to update greeting's information
             guestbook_name = request.POST.get('guestbook_name')
-            guestbook_key = Greeting.get_key_from_name(guestbook_name)
-            greeting = Greeting(parent=guestbook_key)
+            myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
-                greeting.author = users.get_current_user().nickname()
-            greeting.content = request.POST.get('content')
+                myGuestbook.put_greeting(users.get_current_user().nickname(), request.POST.get('content'))
+            else:
+                myGuestbook.put_greeting(None, request.POST.get('content'))
             #After put this greeting, clear cache
-            if greeting.put():
-                memcache.delete("%s:greetings" %guestbook_name)
+
             return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
