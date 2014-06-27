@@ -27,7 +27,7 @@ class IndexView(TemplateView):
             greetings = memcache.get("%s:greetings" %myGuestbook.name)
             if greetings is None:
                 #Get data from database
-                greetings = self.get_queryset(myGuestbook.get_key(myGuestbook.name)).fetch(10)
+                greetings = self.get_queryset(myGuestbook.get_key()).fetch(10)
                 #Then cache these data, if app can't cache, give an error message
                 if not memcache.add("%s:greetings" %myGuestbook.name, greetings, 10000):
                     logging.error("Memcache set failed")
@@ -58,9 +58,9 @@ class SignView(TemplateView):
             guestbook_name = request.POST.get('guestbook_name')
             myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
-                greeting = Greeting(parent=myGuestbook.get_key(myGuestbook.name), author= users.get_current_user().nickname(), content=request.POST.get('content'))
+                greeting = Greeting(parent=myGuestbook.get_key(), author= users.get_current_user().nickname(), content=request.POST.get('content'))
             else:
-               greeting = Greeting(parent=myGuestbook.get_key(myGuestbook.name), author= None, content=request.POST.get('content'))
+               greeting = Greeting(parent=myGuestbook.get_key(), author= None, content=request.POST.get('content'))
             #After put this greeting, clear cache
             if greeting.put():
                 memcache.delete("%s:greetings" %guestbook_name)

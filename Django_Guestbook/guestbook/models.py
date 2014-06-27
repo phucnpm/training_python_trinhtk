@@ -9,6 +9,5 @@ class Greeting(ndb.Model):
 
 class Guestbook(ndb.Model):
     name = ndb.StringProperty()
-    @classmethod
-    def get_key(cls, name):
-        return ndb.Key('Guestbook', name or 'default_guestbook')
+    def get_key(self):
+        return ndb.Key('Guestbook', self.name or 'default_guestbook')
