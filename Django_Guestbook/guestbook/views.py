@@ -14,14 +14,14 @@ class IndexView(TemplateView):
 
         template_name = "guestbook/mainpage.html"
         #Methode get data from database
-
+        DEFAULT_PAGE_SIZE = 10
         def get_context_data(self, **kwargs):
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
             myGuestbook = Guestbook(name= guestbook_name)
             greetings = memcache.get("%s:greetings" %myGuestbook.name)
             if greetings is None:
                 #Get data from database
-                greetings = myGuestbook.get_latest(10)
+                greetings = myGuestbook.get_latest(self.DEFAULT_PAGE_SIZE)
                 #Then cache these data, if app can't cache, give an error message
                 if not memcache.add("%s:greetings" %myGuestbook.name, greetings, 10000):
                     logging.error("Memcache set failed")
