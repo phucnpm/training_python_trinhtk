@@ -1,4 +1,4 @@
 from django import  forms
 class SignForm(forms.Form):
-    guestbook_name = forms.CharField(required=True)
-    content = forms.CharField(widget=forms.Textarea, required=True)
+    content = forms.CharField(widget=forms.Textarea, required=True, max_length=10)
+    guestbook_name = forms.CharField(initial='default_guestbook')

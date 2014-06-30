@@ -1,21 +1,22 @@
 # Create your views here.
 import logging
 import urllib
+from django.http.response import HttpResponseRedirect
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from google.appengine.api import users
 from google.appengine.api import memcache
 from django.contrib.databrowse.plugins.calendars import IndexView
-from django.http import HttpResponseRedirect
-from django.views.generic.base import TemplateView
 from guestbook.forms import SignForm
 from guestbook.models import Greeting, Guestbook
 
 
-class IndexView(TemplateView):
+class IndexView(FormView):
 
         template_name = "guestbook/mainpage.html"
         #Methode get data from database
         DEFAULT_PAGE_SIZE = 10
+        form_class = SignForm
         def get_context_data(self, **kwargs):
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
             myGuestbook = Guestbook(name= guestbook_name)
@@ -56,3 +57,6 @@ class SignView(FormView):
                 myGuestbook.put_greeting(None, content)
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
+        def form_invalid(self, form):
+            self.template_name="guestbook/error.html"
+            return super(SignView, self).form_invalid(form)
