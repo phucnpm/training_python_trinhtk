@@ -50,9 +50,11 @@ class SignView(FormView):
             guestbook_name = form.cleaned_data.get('guestbook_name')
             content = form.cleaned_data.get('content')
             myGuestbook = Guestbook(name=guestbook_name)
+            SignView.Add(myGuestbook, content)
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
-        def post(self, myGuestbook, content):
+        @classmethod
+        def Add(cls, myGuestbook, content):
             #When user signs into guestbook, these following code will help to update greeting's information
             if users.get_current_user():
                 myGuestbook.put_greeting(users.get_current_user().nickname(), content)
