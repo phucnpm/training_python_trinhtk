@@ -1,16 +1,16 @@
 # Create your views here.
 import logging
 import urllib
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 from google.appengine.api import users
 from google.appengine.api import memcache
 from django.contrib.databrowse.plugins.calendars import IndexView
-from django.http import HttpResponseRedirect
-from django.views.generic.base import TemplateView
-from guestbook.models import Greeting, Guestbook
+from guestbook.forms import SignForm
+from guestbook.models import Guestbook
 
 
 class IndexView(TemplateView):
-
 
         template_name = "guestbook/mainpage.html"
         #Methode get data from database
@@ -41,19 +41,20 @@ class IndexView(TemplateView):
             context['url_linktext']= url_linktext
             return context
 
-class SignView(TemplateView):
-
+class SignView(FormView):
 
         template_name = "guestbook/mainpage.html"
-        
-        def post(self, request, *args, **kwargs):
-            #When user signs into guestbook, these following code will help to update greeting's information
-            guestbook_name = request.POST.get('guestbook_name')
+        form_class = SignForm
+        def form_valid(self, form):
+            guestbook_name = form.cleaned_data.get('guestbook_name')
+            content = form.cleaned_data.get('content')
             myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
-                myGuestbook.put_greeting(users.get_current_user().nickname(), request.POST.get('content'))
+                myGuestbook.put_greeting(users.get_current_user().nickname(), content)
             else:
-                myGuestbook.put_greeting(None, request.POST.get('content'))
-            #After put this greeting, clear cache
-
-            return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
+                myGuestbook.put_greeting(None, content)
+            self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
+            return super(SignView, self).form_valid(form)
+        def form_invalid(self, form):
+            self.template_name="guestbook/error.html"
+            return super(SignView, self).form_invalid(form)

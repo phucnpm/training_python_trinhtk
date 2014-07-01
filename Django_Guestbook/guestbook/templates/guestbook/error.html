@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheet/main.css" />
+  </head>
+  <body></body>
+    <form action="/sign/" method="post">
+      {% csrf_token %}
+      {{ form }}
+      <div><input type="submit" value="Sign Guestbook"></div>
+    </form>
+  </body>
+</html>
