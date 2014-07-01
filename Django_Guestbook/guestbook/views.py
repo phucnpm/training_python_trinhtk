@@ -1,14 +1,12 @@
 # Create your views here.
 import logging
 import urllib
-from django.http.response import HttpResponseRedirect
-from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from google.appengine.api import users
 from google.appengine.api import memcache
 from django.contrib.databrowse.plugins.calendars import IndexView
 from guestbook.forms import SignForm
-from guestbook.models import Greeting, Guestbook
+from guestbook.models import Guestbook
 
 
 class IndexView(FormView):

@@ -2,23 +2,12 @@
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheet/main.css" />
   </head>
-  <body>
-    {% for greeting in greetings %}
-      {% if greeting.author %}
-        <b>{{ greeting.author }}</b> wrote:
-      {% else %}
-        An anonymous person wrote:
-      {% endif %}
-      <blockquote>{{ greeting.content|escape }}</blockquote>
-    {% endfor %}
-
+  <body></body>
     <form action="/sign/" method="post">
       {% csrf_token %}
-      {{ form.as_p }}
+      {{ form }}
       <div><input type="submit" value="Sign Guestbook"></div>
     </form>
-
     <a href="{{ url }}">{{ url_linktext }}</a>
-
   </body>
 </html>
