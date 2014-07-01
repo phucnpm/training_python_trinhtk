@@ -1,6 +1,7 @@
 # Create your views here.
 import logging
 import urllib
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -9,12 +10,11 @@ from guestbook.forms import SignForm
 from guestbook.models import Guestbook
 
 
-class IndexView(FormView):
+class IndexView(TemplateView):
 
         template_name = "guestbook/mainpage.html"
         #Methode get data from database
         DEFAULT_PAGE_SIZE = 10
-        form_class = SignForm
         def get_context_data(self, **kwargs):
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
             myGuestbook = Guestbook(name= guestbook_name)
