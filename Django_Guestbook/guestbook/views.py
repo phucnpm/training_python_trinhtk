@@ -1,6 +1,7 @@
 # Create your views here.
 import logging
 import urllib
+from django.http import HttpResponse
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from google.appengine.api import users
@@ -9,9 +10,14 @@ from google.appengine.api import mail
 from django.contrib.databrowse.plugins.calendars import IndexView
 from google.appengine.ext import ndb
 from google.appengine.ext import webapp
-from google.appengine.api import taskqueue
+try:
+    from google.appengine.api.labs import taskqueue
+except ImportError:
+    from google.appengine.api import taskqueue
+import webapp2
 from guestbook.forms import SignForm
 from guestbook.models import Guestbook
+
 
 
 class IndexView(TemplateView):
@@ -57,12 +63,13 @@ class SignView(FormView):
             if users.get_current_user():
                 myGuestbook.put_greeting(users.get_current_user().nickname(), content)
                 logging.warning("CHUAN BI TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                taskqueue.add(url='/send/', params=dict(guestbook_name=myGuestbook.name, content=content, author=users.get_current_user().nickname()))
+                taskqueue.add(url='/send/', method='GET')
+                #taskqueue.add(url='/send/',method='GET', params=dict(guestbook_name=myGuestbook.name, content=content, author=users.get_current_user().nickname()))
                 #self.SendMail(myGuestbook.name, content, users.get_current_user().nickname())
+                #taskqueue.add(url='/')
             else:
                 myGuestbook.put_greeting(None, content)
-                taskqueue.add(url='/send/', params=dict(guestbook_name=myGuestbook.name, content=content, author=None))
-
+                taskqueue.add(url='/send/', method='GET')
                 #self.SendMail(myGuestbook.name, content, None)
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
@@ -71,14 +78,25 @@ class SignView(FormView):
             self.template_name="guestbook/error.html"
             return super(SignView, self).form_invalid(form)
 
-class Send(webapp.RequestHandler):
-        @ndb.transactional
-        def post(self):
+class Send(TemplateView):
+        # logging.warning("vao trong================================================")
+        # @ndb.transactional
+        # def post(self):
+        #     logging.warning("==================================================================================================")
+        #     mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
+        #       to="Admin<kingsley13693@gmail.com>",
+        #       subject="New greeting has been signed",
+        #       body="""
+        #        Guestbook name: %s
+        #        Content: %s
+        #        Author: %s
+        #         """ %(self.request.get('guestbook_name', None), self.request.get('content', None), self.request.get('author', None)))
+        def get(self, request, *args, **kwargs):
             mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
               to="Admin<kingsley13693@gmail.com>",
               subject="New greeting has been signed",
               body="""
-               Guestbook name: %s
-               Content: %s
-               Author: %s
-                """ %(self.request.get('guestbook_name', None), self.request.get('content', None), self.request.get('author', None)))
+               Check guestbook !!!
+                """)
+            return HttpResponse('asv')
+
