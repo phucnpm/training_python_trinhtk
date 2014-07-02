@@ -72,6 +72,7 @@ class SignView(FormView):
             return super(SignView, self).form_invalid(form)
 
 class Send(webapp.RequestHandler):
+        @ndb.transactional
         def post(self):
             mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
               to="Admin<kingsley13693@gmail.com>",
