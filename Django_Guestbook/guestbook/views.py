@@ -5,7 +5,11 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.api import mail
 from django.contrib.databrowse.plugins.calendars import IndexView
+from google.appengine.ext import ndb
+from google.appengine.ext import webapp
+from google.appengine.api import taskqueue
 from guestbook.forms import SignForm
 from guestbook.models import Guestbook
 
@@ -45,16 +49,35 @@ class SignView(FormView):
 
         template_name = "guestbook/mainpage.html"
         form_class = SignForm
+
         def form_valid(self, form):
             guestbook_name = form.cleaned_data.get('guestbook_name')
             content = form.cleaned_data.get('content')
             myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
                 myGuestbook.put_greeting(users.get_current_user().nickname(), content)
+                logging.warning("CHUAN BI TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                taskqueue.add(url='/send/', params=dict(guestbook_name=myGuestbook.name, content=content, author=users.get_current_user().nickname()))
+                #self.SendMail(myGuestbook.name, content, users.get_current_user().nickname())
             else:
                 myGuestbook.put_greeting(None, content)
+                taskqueue.add(url='/send/', params=dict(guestbook_name=myGuestbook.name, content=content, author=None))
+
+                #self.SendMail(myGuestbook.name, content, None)
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
+
         def form_invalid(self, form):
             self.template_name="guestbook/error.html"
             return super(SignView, self).form_invalid(form)
+
+class Send(webapp.RequestHandler):
+        def post(self):
+            mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
+              to="Admin<kingsley13693@gmail.com>",
+              subject="New greeting has been signed",
+              body="""
+               Guestbook name: %s
+               Content: %s
+               Author: %s
+                """ %(self.request.get('guestbook_name', None), self.request.get('content', None), self.request.get('author', None)))
