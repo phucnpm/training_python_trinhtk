@@ -37,19 +37,14 @@ class IndexView(TemplateView):
                     logging.error("Memcache set failed")
             context = super(IndexView,self).get_context_data(**kwargs)
             #Check whether user loged in
-            type ="hidden"
             if users.get_current_user():
                 #Create link logout & text
                 url = users.create_logout_url(self.request.get_full_path())
                 url_linktext = 'Logout'
-                if users.is_current_user_admin():
-                    type = "submit"
-                    url_linktext = 'Hi admin :D, do you want to log out ?'
             else:
                 #Create link login & text
                 url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
-            context['type'] = type
             context['greetings'] = greetings
             context['guestbook_name'] = myGuestbook.name
             context['url'] = url
