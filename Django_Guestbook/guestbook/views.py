@@ -62,15 +62,10 @@ class SignView(FormView):
             myGuestbook = Guestbook(name=guestbook_name)
             if users.get_current_user():
                 myGuestbook.put_greeting(users.get_current_user().nickname(), content)
-                logging.warning("CHUAN BI TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                taskqueue.add(url='/send/', method='GET')
-                #taskqueue.add(url='/send/',method='GET', params=dict(guestbook_name=myGuestbook.name, content=content, author=users.get_current_user().nickname()))
-                #self.SendMail(myGuestbook.name, content, users.get_current_user().nickname())
-                #taskqueue.add(url='/')
+                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':myGuestbook.name, 'author':users.get_current_user().nickname(), 'content':content})
             else:
                 myGuestbook.put_greeting(None, content)
-                taskqueue.add(url='/send/', method='GET')
-                #self.SendMail(myGuestbook.name, content, None)
+                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':myGuestbook.name, 'author': None, 'content':content})
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
 
@@ -79,24 +74,15 @@ class SignView(FormView):
             return super(SignView, self).form_invalid(form)
 
 class Send(TemplateView):
-        # logging.warning("vao trong================================================")
-        # @ndb.transactional
-        # def post(self):
-        #     logging.warning("==================================================================================================")
-        #     mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
-        #       to="Admin<kingsley13693@gmail.com>",
-        #       subject="New greeting has been signed",
-        #       body="""
-        #        Guestbook name: %s
-        #        Content: %s
-        #        Author: %s
-        #         """ %(self.request.get('guestbook_name', None), self.request.get('content', None), self.request.get('author', None)))
+
         def get(self, request, *args, **kwargs):
             mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
               to="Admin<kingsley13693@gmail.com>",
               subject="New greeting has been signed",
               body="""
-               Check guestbook !!!
-                """)
-            return HttpResponse('asv')
+               Guestbook: %s
+               Author: %s
+               Content: %s
+                """ %(self.request.GET.get("guestbook_name"), self.request.GET.get("author"), self.request.GET.get("content")))
+            return HttpResponse('Email has been sent')
 
