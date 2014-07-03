@@ -1,3 +1,0 @@
-queue:
-- name: mailer
-  rate: 2000/d
