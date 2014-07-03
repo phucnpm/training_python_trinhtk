@@ -22,6 +22,7 @@ class Guestbook(ndb.Model):
     def get_latest(self, count):
         return Greeting.query(
                     ancestor= self.get_key()).order(-Greeting.date).fetch(count)
+    @ndb.transactional
     def put_greeting(self, author, content):
         greeting = Greeting(parent=self.get_key(), author= author, content= content)
         if greeting.put():
