@@ -7,10 +7,11 @@ class Greeting(ndb.Model):
     author = ndb.StringProperty()
     content = ndb.StringProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
-
+    def delete(self):
+        query = Greeting.query(Greeting.date == self.date, Greeting.author == self.author, Greeting.content == self.content).fetch(1, keys_only=True)
+        ndb.delete_multi(query)
 class Guestbook(ndb.Model):
     name = ndb.StringProperty()
-
     def get_key(self):
         return ndb.Key(Guestbook, self.name or self.get_default_name())
     def get_latest(self, count):
@@ -20,7 +21,6 @@ class Guestbook(ndb.Model):
         greeting = Greeting(parent=self.get_key(), author= author, content= content)
         if greeting.put():
             memcache.delete("%s:greetings" %self.name)
-
     @classmethod
     def get_default_name(cls):
         return DEFAULT_NAME
