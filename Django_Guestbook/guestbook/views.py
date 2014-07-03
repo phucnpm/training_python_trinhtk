@@ -55,26 +55,30 @@ class SignView(FormView):
 
         template_name = "guestbook/mainpage.html"
         form_class = SignForm
-
         def form_valid(self, form):
+            #When form is valid, guestbook name = get data of field named guestbook_name, content = get data of field named content
             guestbook_name = form.cleaned_data.get('guestbook_name')
             content = form.cleaned_data.get('content')
+            #create new guestbook with its name = guestbook_name
             myGuestbook = Guestbook(name=guestbook_name)
+            #if user loged in, taskqueue will add this task with params : guestbook_name, author, content
             if users.get_current_user():
                 myGuestbook.put_greeting(users.get_current_user().nickname(), content)
                 taskqueue.add(url='/send/',method='GET', params={'guestbook_name':myGuestbook.name, 'author':users.get_current_user().nickname(), 'content':content})
+            #else, author = none
             else:
                 myGuestbook.put_greeting(None, content)
                 taskqueue.add(url='/send/',method='GET', params={'guestbook_name':myGuestbook.name, 'author': None, 'content':content})
+            #after add task, redirect to success_url
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
-
+            #When form is invalid, generate error page
         def form_invalid(self, form):
             self.template_name="guestbook/error.html"
             return super(SignView, self).form_invalid(form)
 
 class Send(TemplateView):
-
+        #Send mail in get function with params: guestbook_name, author, content
         def get(self, request, *args, **kwargs):
             mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
               to="Admin<kingsley13693@gmail.com>",
@@ -84,5 +88,6 @@ class Send(TemplateView):
                Author: %s
                Content: %s
                 """ %(self.request.GET.get("guestbook_name"), self.request.GET.get("author"), self.request.GET.get("content")))
+            #after send mail, generate a message
             return HttpResponse('Email has been sent')
 
