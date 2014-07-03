@@ -1,5 +1,10 @@
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
+from google.appengine.api import users
+try:
+    from google.appengine.api.labs import taskqueue
+except ImportError:
+    from google.appengine.api import taskqueue
 # Create your models here.
 DEFAULT_NAME = 'default_guestbook'
 class Greeting(ndb.Model):
@@ -20,6 +25,10 @@ class Guestbook(ndb.Model):
     def put_greeting(self, author, content):
         greeting = Greeting(parent=self.get_key(), author= author, content= content)
         if greeting.put():
+            if users.get_current_user():
+                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':self.name, 'author':users.get_current_user().nickname(), 'content':content})
+            else:
+                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':self.name, 'author': None, 'content':content})
             memcache.delete("%s:greetings" %self.name)
     @classmethod
     def get_default_name(cls):

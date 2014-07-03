@@ -9,7 +9,6 @@ from google.appengine.api import memcache
 from google.appengine.api import mail
 from django.contrib.databrowse.plugins.calendars import IndexView
 from google.appengine.ext import ndb
-from google.appengine.ext import webapp
 try:
     from google.appengine.api.labs import taskqueue
 except ImportError:
@@ -64,11 +63,9 @@ class SignView(FormView):
             #if user loged in, taskqueue will add this task with params : guestbook_name, author, content
             if users.get_current_user():
                 myGuestbook.put_greeting(users.get_current_user().nickname(), content)
-                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':myGuestbook.name, 'author':users.get_current_user().nickname(), 'content':content})
             #else, author = none
             else:
                 myGuestbook.put_greeting(None, content)
-                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':myGuestbook.name, 'author': None, 'content':content})
             #after add task, redirect to success_url
             self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(SignView, self).form_valid(form)
@@ -79,6 +76,7 @@ class SignView(FormView):
 
 class Send(TemplateView):
         #Send mail in get function with params: guestbook_name, author, content
+        @ndb.transactional
         def get(self, request, *args, **kwargs):
             mail.send_mail(sender="Application <khtrinh.tran@gmail.com>",
               to="Admin<kingsley13693@gmail.com>",
