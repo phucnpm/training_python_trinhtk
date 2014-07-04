@@ -31,6 +31,11 @@ class Guestbook(ndb.Model):
             else:
                 taskqueue.add(url='/send/',method='GET', params={'guestbook_name':self.name, 'author': None, 'content':content})
             memcache.delete("%s:greetings" %self.name)
+    @ndb.transactional
+    def delete_greeting(self, id):
+        key = ndb.Key(Guestbook, self.name, Greeting, int(id))
+        key.delete()
+        memcache.delete("%s:greetings" %self.name)
     @classmethod
     def get_default_name(cls):
         return DEFAULT_NAME

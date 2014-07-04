@@ -44,6 +44,7 @@ class IndexView(TemplateView):
                 #Create link login & text
                 url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
+            context['is_admin']= users.is_current_user_admin()
             context['greetings'] = greetings
             context['guestbook_name'] = myGuestbook.name
             context['url'] = url
@@ -88,4 +89,13 @@ class Send(TemplateView):
                 """ %(self.request.GET.get("guestbook_name"), self.request.GET.get("author"), self.request.GET.get("content")))
             #after send mail, generate a message
             return HttpResponse('Email has been sent')
-
+class Delete(TemplateView):
+        @ndb.transactional
+        def get(self, request, *args, **kwargs):
+            guestbook_name = self.request.GET.get("guestbook_name")
+            id = self.request.GET.get("id")
+            myGuestbook = Guestbook(name=guestbook_name)
+            if users.is_current_user_admin():
+                myGuestbook.delete_greeting(id)
+                return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
+            return HttpResponse("You are not administrator :)")
