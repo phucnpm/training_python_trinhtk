@@ -117,20 +117,11 @@ class Edit(FormView):
             id = form.cleaned_data.get('id')
             #create new guestbook with its name = guestbook_name
             myGuestbook = Guestbook(name=guestbook_name)
-            user = users.get_current_user().nickname()
-            self.success_url = ('/editsuccess/?guestbook_name=%s&content=%s&au=%s&id=%s' %(guestbook_name, content,user,id))
+            au = users.get_current_user().nickname()
+            myGuestbook.update_greeting(id, content, au)
+            self.success_url = '/?'+urllib.urlencode({'guestbook_name':guestbook_name})
             return super(Edit, self).form_valid(form)
             #When form is invalid, generate error page
         def form_invalid(self, form):
-            self.template_name="guestbook/error_edit.html"
+            self.template_name="guestbook/edit.html"
             return super(Edit, self).form_invalid(form)
-class EditSuccess(TemplateView):
-        template_name = "guestbook/mainpage.html"
-        def get(self, request, *args, **kwargs):
-            guestbook_name = self.request.GET.get("guestbook_name")
-            id = self.request.GET.get("id")
-            content = self.request.GET.get("content")
-            au = self.request.GET.get("au")
-            myGuestbook = Guestbook(name=guestbook_name)
-            myGuestbook.update_greeting(id, content, au)
-            return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
