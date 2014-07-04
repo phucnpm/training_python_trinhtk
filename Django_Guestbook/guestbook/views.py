@@ -36,14 +36,18 @@ class IndexView(TemplateView):
                     logging.error("Memcache set failed")
             context = super(IndexView,self).get_context_data(**kwargs)
             #Check whether user loged in
+            type = 'hidden'
             if users.get_current_user():
                 #Create link logout & text
                 url = users.create_logout_url(self.request.get_full_path())
                 url_linktext = 'Logout'
+                if users.is_current_user_admin():
+                    type="visible"
             else:
                 #Create link login & text
                 url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
+            context['type'] = type
             context['greetings'] = greetings
             context['guestbook_name'] = myGuestbook.name
             context['url'] = url
@@ -94,5 +98,7 @@ class Delete(TemplateView):
             guestbook_name = self.request.GET.get("guestbook_name")
             id = self.request.GET.get("id")
             myGuestbook = Guestbook(name=guestbook_name)
-            myGuestbook.delete_greeting(id)
-            return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
+            if users.is_current_user_admin():
+                myGuestbook.delete_greeting(id)
+                return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
+            return HttpResponse("You are not administrator :)")
