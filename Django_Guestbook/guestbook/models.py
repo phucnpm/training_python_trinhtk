@@ -1,3 +1,4 @@
+import datetime
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.api import users
@@ -44,6 +45,7 @@ class Guestbook(ndb.Model):
         myGreeting = key.get()
         myGreeting.content = content
         myGreeting.updated_by = user
+        myGreeting.last_update = datetime.datetime.now()
         if myGreeting.put():
             memcache.delete("%s:greetings" %self.name)
     @ndb.transactional
