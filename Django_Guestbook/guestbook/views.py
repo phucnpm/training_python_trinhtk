@@ -88,4 +88,11 @@ class Send(TemplateView):
                 """ %(self.request.GET.get("guestbook_name"), self.request.GET.get("author"), self.request.GET.get("content")))
             #after send mail, generate a message
             return HttpResponse('Email has been sent')
-
+class Delete(TemplateView):
+        @ndb.transactional
+        def get(self, request, *args, **kwargs):
+            guestbook_name = self.request.GET.get("guestbook_name")
+            id = self.request.GET.get("id")
+            myGuestbook = Guestbook(name=guestbook_name)
+            myGuestbook.delete_greeting(id)
+            return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
