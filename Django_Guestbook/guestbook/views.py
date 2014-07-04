@@ -14,7 +14,7 @@ try:
 except ImportError:
     from google.appengine.api import taskqueue
 import webapp2
-from guestbook.forms import SignForm
+from guestbook.forms import SignForm, EditForm
 from guestbook.models import Guestbook, Greeting
 
 
@@ -40,10 +40,12 @@ class IndexView(TemplateView):
                 #Create link logout & text
                 url = users.create_logout_url(self.request.get_full_path())
                 url_linktext = 'Logout'
+                context['current_user']=users.get_current_user().nickname()
             else:
                 #Create link login & text
                 url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
+
             context['is_admin']= users.is_current_user_admin()
             context['greetings'] = greetings
             context['guestbook_name'] = myGuestbook.name
@@ -99,3 +101,36 @@ class Delete(TemplateView):
                 myGuestbook.delete_greeting(id)
                 return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
             return HttpResponse("You are not administrator :)")
+class Edit(FormView):
+        template_name = "guestbook/edit.html"
+        form_class = EditForm
+        def get(self, request, *args, **kwargs):
+            guestbook_name = self.request.GET.get("guestbook_name")
+            id = self.request.GET.get("id")
+            myGuestbook = Guestbook(name=guestbook_name)
+            greeting = myGuestbook.get_greeting_by_id(id)
+            return self.render_to_response(self.get_context_data(greeting=greeting, guestbook_name=guestbook_name, id=id))
+        def form_valid(self, form):
+            #When form is valid, guestbook name = get data of field named guestbook_name, content = get data of field named content
+            guestbook_name = form.cleaned_data.get('guestbook_name')
+            content = form.cleaned_data.get('content')
+            id = form.cleaned_data.get('id')
+            #create new guestbook with its name = guestbook_name
+            myGuestbook = Guestbook(name=guestbook_name)
+            user = users.get_current_user().nickname()
+            self.success_url = ('/editsuccess/?guestbook_name=%s&content=%s&au=%s&id=%s' %(guestbook_name, content,user,id))
+            return super(Edit, self).form_valid(form)
+            #When form is invalid, generate error page
+        def form_invalid(self, form):
+            self.template_name="guestbook/error_edit.html"
+            return super(Edit, self).form_invalid(form)
+class EditSuccess(TemplateView):
+        template_name = "guestbook/mainpage.html"
+        def get(self, request, *args, **kwargs):
+            guestbook_name = self.request.GET.get("guestbook_name")
+            id = self.request.GET.get("id")
+            content = self.request.GET.get("content")
+            au = self.request.GET.get("au")
+            myGuestbook = Guestbook(name=guestbook_name)
+            myGuestbook.update_greeting(id, content, au)
+            return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))

@@ -12,6 +12,8 @@ class Greeting(ndb.Model):
     author = ndb.StringProperty()
     content = ndb.StringProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
+    last_update = ndb.DateTimeProperty()
+    updated_by = ndb.StringProperty()
     def delete(self):
         query = Greeting.query(Greeting.date == self.date, Greeting.author == self.author, Greeting.content == self.content).fetch(1, keys_only=True)
         ndb.delete_multi(query)
@@ -36,6 +38,17 @@ class Guestbook(ndb.Model):
         key = ndb.Key(Guestbook, self.name, Greeting, int(id))
         key.delete()
         memcache.delete("%s:greetings" %self.name)
+    @ndb.transactional
+    def update_greeting(self, id, content, user):
+        key = ndb.Key(Guestbook, self.name, Greeting, int(id))
+        myGreeting = key.get()
+        myGreeting.content = content
+        myGreeting.updated_by = user
+        if myGreeting.put():
+            memcache.delete("%s:greetings" %self.name)
+    @ndb.transactional
+    def get_greeting_by_id(self, id):
+        return ndb.Key(Guestbook, self.name, Greeting, int(id)).get
     @classmethod
     def get_default_name(cls):
         return DEFAULT_NAME

@@ -3,10 +3,10 @@
     <link type="text/css" rel="stylesheet" href="/stylesheet/main.css" />
   </head>
   <body></body>
-    <form action="/sign/" method="post">
+    <form action="/edit/" method="post">
       {% csrf_token %}
       {{ form.as_p }}
-      <div><input type="submit" value="Sign Guestbook"></div>
+      <div><input type="submit" value="Done"></div>
     </form>
   </body>
 </html>
