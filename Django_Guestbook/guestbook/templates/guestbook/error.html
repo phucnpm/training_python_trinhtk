@@ -5,7 +5,7 @@
   <body></body>
     <form action="/sign/" method="post">
       {% csrf_token %}
-      {{ form }}
+      {{ form.as_p }}
       <div><input type="submit" value="Sign Guestbook"></div>
     </form>
   </body>

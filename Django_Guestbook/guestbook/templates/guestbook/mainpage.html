@@ -10,9 +10,17 @@
         An anonymous person wrote:
       {% endif %}
       <blockquote>{{ greeting.content|escape }}</blockquote>
-      {% if is_admin %}
-            <a href="delete/?guestbook_name={{ guestbook_name }}&id={{ greeting.key.id }}">Delete</a><br/>
-      {% endif %}
+        {% if greeting.updated_by %}
+            Last update at : {{ greeting.last_update }}<br/>
+            Updated by: {{ greeting.updated_by }}<br/><br/>
+        {% endif %}
+      {% if is_admin or current_user == greeting.author %}
+          {% if is_admin %}
+                <a href="delete/?guestbook_name={{ guestbook_name }}&id={{ greeting.key.id }}">Delete</a>
+          {% endif %}
+          <a href="edit/?guestbook_name={{ guestbook_name }}&id={{ greeting.key.id }}">Edit</a><br/>
+
+       {% endif %}
     {% endfor %}
 
     <form action="/sign/" method="post">

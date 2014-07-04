@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link type="text/css" rel="stylesheet" href="/stylesheet/main.css" />
+</head>
+<body>
+    {% if not form.errors %}
+    Edit greeting:<br/>
+    Author: {{ greeting.author }}<br/>
+    Content: {{ greeting.content }}<br/>
+    {% endif %}
+    <form action="/edit/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="guestbook_name" value="{{ guestbook_name }}" />
+      <input type="hidden" name="id" value="{{ id }}" />
+       {% if not form.errors %}
+            <div><textarea name="content" rows="3" cols="60" >{{ greeting.content }}</textarea></div>
+        {% endif %}
+      {{ form.as_p }}
+      <div><input type="submit" value="Done"></div>
+    </form>
+</body>
+</html>
