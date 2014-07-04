@@ -12,7 +12,7 @@
       {% csrf_token %}
       <input type="hidden" name="guestbook_name" value="{{ guestbook_name }}" />
       <input type="hidden" name="id" value="{{ id }}" />
-      <div><textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><textarea name="content" rows="3" cols="60" >{{ greeting.content }}</textarea></div>
       <div><input type="submit" value="Done"></div>
     </form>
 </body>
