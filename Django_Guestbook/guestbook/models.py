@@ -18,6 +18,9 @@ class Greeting(ndb.Model):
     def delete(self):
         query = Greeting.query(Greeting.date == self.date, Greeting.author == self.author, Greeting.content == self.content).fetch(1, keys_only=True)
         ndb.delete_multi(query)
+    def convert_to_dict(self):
+        dict = {"content":self.content}
+        return dict
 class Guestbook(ndb.Model):
     name = ndb.StringProperty()
     def get_key(self):

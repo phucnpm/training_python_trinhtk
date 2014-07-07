@@ -1,9 +1,13 @@
 # Create your views here.
+from datetime import date
 import logging
 import urllib
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic.base import TemplateView
+from django.shortcuts import render_to_response
+from django.views.generic.base import TemplateView, TemplateResponseMixin
+from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import FormView
+from django.views.generic import View
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.api import mail
@@ -16,7 +20,7 @@ except ImportError:
 import webapp2
 from guestbook.forms import SignForm, EditForm
 from guestbook.models import Guestbook, Greeting
-
+from guestbook.api import JSONResponseMixin
 
 
 class IndexView(TemplateView):
@@ -52,7 +56,6 @@ class IndexView(TemplateView):
             context['url'] = url
             context['url_linktext']= url_linktext
             return context
-
 class SignView(FormView):
 
         template_name = "guestbook/mainpage.html"
@@ -125,3 +128,15 @@ class Edit(FormView):
         def form_invalid(self, form):
             self.template_name="guestbook/edit.html"
             return super(Edit, self).form_invalid(form)
+class search(JSONResponseMixin, BaseDetailView):
+    def get(self, request, *args, **kwargs):
+        guestbook_name = kwargs['guestbook_name']
+        items = Greeting.query(
+                    ancestor= ndb.Key(Guestbook, guestbook_name)).fetch(2)
+        i = 0
+        dict_item={}
+        for x in items:
+            dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':x.last_update.strftime("%Y-%m-%d %H:%M +0000")}
+            i +=1
+        context = {'guestbook_name':guestbook_name, '_greetings':dict_item}
+        return self.render_to_response(context)
