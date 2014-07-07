@@ -136,7 +136,10 @@ class search(JSONResponseMixin, BaseDetailView):
         i = 0
         dict_item={}
         for x in items:
-            dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':x.last_update.strftime("%Y-%m-%d %H:%M +0000")}
+            if x.last_update:
+                dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':x.last_update.strftime("%Y-%m-%d %H:%M +0000")}
+            else:
+                dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':None}
             i +=1
         context = {'guestbook_name':guestbook_name, '_greetings':dict_item}
         return self.render_to_response(context)
