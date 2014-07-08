@@ -3,6 +3,7 @@ from datetime import date
 import logging
 import urllib
 from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.views.generic.list import BaseListView
 from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import BaseDetailView
@@ -18,7 +19,7 @@ try:
 except ImportError:
     from google.appengine.api import taskqueue
 import webapp2
-from guestbook.forms import SignForm, EditForm
+from guestbook.forms import SignForm, EditForm, apiForm
 from guestbook.models import Guestbook, Greeting
 from guestbook.api import JSONResponseMixin
 
@@ -128,7 +129,7 @@ class Edit(FormView):
         def form_invalid(self, form):
             self.template_name="guestbook/edit.html"
             return super(Edit, self).form_invalid(form)
-class search(JSONResponseMixin, BaseDetailView):
+class search(JSONResponseMixin, FormView):
     def get(self, request, *args, **kwargs):
         guestbook_name = kwargs['guestbook_name']
         try:
@@ -151,3 +152,43 @@ class search(JSONResponseMixin, BaseDetailView):
         else :
             context = {'count':i,'guestbook_name':guestbook_name, 'more':more, 'greetings':[]}
         return self.render_to_response(context)
+    form_class = apiForm
+#POST /api/guestbook/<guestbook_name>/greeting
+    #
+    # Create new greeting
+    # Successful return Http 204
+    # Fail return Http 404
+    # Form invalid return Http 400
+
+    def post(self, request, *args, **kwargs):
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+    def form_invalid(self, form):
+        super(search, self).form_invalid(form)
+        return HttpResponse(status=400)
+    def form_valid(self, form):
+        guestbook_name = self.request.POST.get('guestbook_name')
+        myGuestbook = Guestbook(name=guestbook_name)
+        content = self.request.POST.get('content')
+        if users.get_current_user():
+            author = users.get_current_user().nickname()
+        else:
+            author=None
+        if Greeting(parent=myGuestbook.get_key(), author= author, content= content):
+            return HttpResponse(status=204)
+        else:
+            raise Http404
+            return HttpResponse(status=404)
+    def get_context_data(self, **kwargs):
+        context = super(search,self).get_context_data(**kwargs)
+        context['guestbook_name'] = self.request.POST.get('guestbook_name')
+        logging.warning('%s' %context['guestbook_name'])
+        return context
+
+
+
+
