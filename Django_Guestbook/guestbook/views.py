@@ -134,7 +134,6 @@ class search(JSONResponseMixin, BaseDetailView):
         try:
             curs = Cursor(urlsafe=self.request.GET.get('cursor'))
         except datastore_errors.BadValueError:
-            logging.warning("==========ERROR========")
             raise Http404
             return HttpResponse(status=404)
         items, nextcurs, more = Greeting.query(
