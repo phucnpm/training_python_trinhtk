@@ -2,12 +2,12 @@
 from datetime import date
 import logging
 import urllib
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.views.generic.base import TemplateView, TemplateResponseMixin
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from google.appengine.datastore.datastore_query import Cursor
+from django.views.generic.base import TemplateView
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import FormView
-from django.views.generic import View
+from google.appengine.api import datastore_errors
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.api import mail
@@ -131,8 +131,14 @@ class Edit(FormView):
 class search(JSONResponseMixin, BaseDetailView):
     def get(self, request, *args, **kwargs):
         guestbook_name = kwargs['guestbook_name']
-        items = Greeting.query(
-                    ancestor= ndb.Key(Guestbook, guestbook_name)).fetch(2)
+        try:
+            curs = Cursor(urlsafe=self.request.GET.get('cursor'))
+        except datastore_errors.BadValueError:
+            logging.warning("==========ERROR========")
+            raise Http404
+            return HttpResponse(status=404)
+        items, nextcurs, more = Greeting.query(
+                    ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(20, start_cursor=curs)
         i = 0
         dict_item={}
         for x in items:
@@ -141,5 +147,8 @@ class search(JSONResponseMixin, BaseDetailView):
             else:
                 dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':None}
             i +=1
-        context = {'guestbook_name':guestbook_name, '_greetings':dict_item}
+        if i != 0:
+            context =  {'count':i, 'cursor':nextcurs.urlsafe(), 'guestbook_name':guestbook_name, 'greetings':dict_item, 'more':more}
+        else :
+            context = {'count':i,'guestbook_name':guestbook_name, 'more':more, 'greetings':[]}
         return self.render_to_response(context)
