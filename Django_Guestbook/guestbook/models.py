@@ -50,7 +50,7 @@ class Guestbook(ndb.Model):
             memcache.delete("%s:greetings" %self.name)
     @ndb.transactional
     def get_greeting_by_id(self, id):
-        return ndb.Key(Guestbook, self.name, Greeting, int(id)).get
+        return ndb.Key(Guestbook, self.name, Greeting, int(id)).get()
     @classmethod
     def get_default_name(cls):
         return DEFAULT_NAME

@@ -159,7 +159,6 @@ class search(JSONResponseMixin, FormView):
     # Successful return Http 204
     # Fail return Http 404
     # Form invalid return Http 400
-
     def post(self, request, *args, **kwargs):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -188,7 +187,21 @@ class search(JSONResponseMixin, FormView):
         context['guestbook_name'] = self.request.POST.get('guestbook_name')
         logging.warning('%s' %context['guestbook_name'])
         return context
-
-
+class searchID(JSONResponseMixin, BaseListView):
+    def get(self, request, *args, **kwargs):
+        guestbook_name = kwargs['guestbook_name']
+        id = kwargs['id']
+        myGuestBook = Guestbook(name=guestbook_name)
+        x = myGuestBook.get_greeting_by_id(id)
+        if x:
+            if x.last_update:
+                dict_item = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':x.last_update.strftime("%Y-%m-%d %H:%M +0000")}
+            else:
+                dict_item = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':None}
+            context = {'guestbook_name':guestbook_name, 'greetings':dict_item}
+            return self.render_to_response(context)
+        else:
+            raise Http404
+            return HttpResponse(status=404)
 
 
