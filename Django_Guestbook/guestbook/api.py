@@ -5,7 +5,6 @@ from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.edit import FormView
 from google.appengine.api import datastore_errors
 from google.appengine.api import users
-from google.appengine.ext import ndb
 try:
     from google.appengine.api.labs import taskqueue
 except ImportError:
@@ -15,56 +14,62 @@ from guestbook.models import Guestbook, Greeting
 
 
 class JSONResponseMixin(object):
+
     def render_to_response(self, context):
+
         return self.get_json_response(self.convert_context_to_json(context))
 
     def get_json_response(self, content, **httpresponse_kwargs):
+
         return HttpResponse(content,
                                  content_type='application/json',
                                  **httpresponse_kwargs)
 
     def convert_context_to_json(self, context):
+
         return json.dumps(context)
-class search(JSONResponseMixin, FormView):
+
+class Search(JSONResponseMixin, FormView):
+
+#       GET /api/guestbook/<guestbook_name>/greeting
+#
+#       return JSON: guestbookname as STRING, more as BOOL, next_cursor as STRING, 20 lastest greetings
+#       GET /api/guestbook/<guestbook_name>/greeting?cursor=<urlsafe_next_cursor>
+#         return 20 next greetings
+#       return Http 404 if query error
+
     def get(self, request, *args, **kwargs):
+
         guestbook_name = kwargs['guestbook_name']
         try:
             curs = Cursor(urlsafe=self.request.GET.get('cursor'))
         except datastore_errors.BadValueError:
             raise Http404
-        items, nextcurs, more = Greeting.query(
-                    ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(20, start_cursor=curs)
-        i = 0
-        dict_item={}
-        for x in items:
-            if x.last_update:
-                dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':x.last_update.strftime("%Y-%m-%d %H:%M +0000")}
-            else:
-                dict_item[i] = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':None}
-            i +=1
-        if i != 0:
-            context =  {'count':i, 'cursor':nextcurs.urlsafe(), 'guestbook_name':guestbook_name, 'greetings':dict_item, 'more':more}
-        else :
-            context = {'count':i,'guestbook_name':guestbook_name, 'more':more, 'greetings':[]}
+        items, nextcurs, more = Greeting.get_page(guestbook_name,20,curs)
+        dict_item = [x.greeting_to_dict() for x in items]
+        context = {}
+        context["guestbook_name"] = guestbook_name
+        context["greetings"] = dict_item
+        context["more"] = more
+        context["cursor"] = nextcurs.urlsafe()
+        context["count"] = len(items)
         return self.render_to_response(context)
+# POST /api/guestbook/<guestbook_name>/greeting
+#
+#     Create new greeting
+#     Successful return Http 204
+#     Fail return Http 404
+#     Form invalid return Http 400
+
     form_class = apiForm
-#POST /api/guestbook/<guestbook_name>/greeting
-    #
-    # Create new greeting
-    # Successful return Http 204
-    # Fail return Http 404
-    # Form invalid return Http 400
-    # def post(self, request, *args, **kwargs):
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     if form.is_valid():
-    #         return self.form_valid(form)
-    #     else:
-    #         return self.form_invalid(form)
+
     def form_invalid(self, form):
-        super(search, self).form_invalid(form)
+
+        super(Search, self).form_invalid(form)
         return HttpResponse(status=400)
+
     def form_valid(self, form):
+
         guestbook_name = self.request.POST.get('guestbook_name')
         myGuestbook = Guestbook(name=guestbook_name)
         content = self.request.POST.get('content')
@@ -76,15 +81,25 @@ class search(JSONResponseMixin, FormView):
             return HttpResponse(status=204)
         else:
             return HttpResponse(status=404)
+
     def get_context_data(self, **kwargs):
-        context = super(search,self).get_context_data(**kwargs)
+
+        context = super(Search,self).get_context_data(**kwargs)
         context['guestbook_name'] = self.request.POST.get('guestbook_name')
         logging.warning('%s' %context['guestbook_name'])
         return context
-class searchID(JSONResponseMixin, FormView):
-    template_name = "guestbook/api_form.html"
+
+class SearchID(JSONResponseMixin, FormView):
+
     form_class = apiForm
+
+# GET /api/guestbook/<guestbook_name>/greeting/<id>
+#
+#     return JSON: greeting id, content, date, updated_by, updated_date, guestbook_name
+#     return Http 404 if cannot retrieve
+
     def get(self, request, *args, **kwargs):
+
         guestbook_name = kwargs['guestbook_name']
         id = kwargs['id']
         myGuestBook = Guestbook(name=guestbook_name)
@@ -98,7 +113,17 @@ class searchID(JSONResponseMixin, FormView):
             return self.render_to_response(context)
         else:
             raise Http404
+
+# PUT /api/guestbook/<guestbook_name>/greeting/<id>
+#
+#     update date greeting via parameters same as POST
+#     Successful return Http 204
+#     Fail return Http 404
+#     Form invalid return Http 400
+#
+
     def form_valid(self, form):
+
         guestbook_name = self.request.POST.get('guestbook_name')
         id = self.request.POST.get('id')
         content = self.request.POST.get('content')
@@ -109,11 +134,21 @@ class searchID(JSONResponseMixin, FormView):
             return HttpResponse(status=204)
         else:
             return HttpResponse(status=404)
+
     def form_invalid(self, form):
+
         return HttpResponse(status=400)
+
+# DELETE /api/guestbook/<guestbook_name>/greeting/<id>
+#
+#     delete greeting
+#     Successful return Http 204
+#     Fail return Http 404
+
     def delete(self, request, *args, **kwargs):
-        guestbook_name = self.request.POST.get('guestbook_name')
-        id = self.request.POST.get('id')
+
+        guestbook_name = kwargs['guestbook_name']
+        id = kwargs['id']
         myGuestbook = Guestbook(name=guestbook_name)
         if users.is_current_user_admin():
             myGuestbook.delete_greeting(id)

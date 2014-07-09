@@ -2,13 +2,9 @@
 from datetime import date
 import logging
 import urllib
-from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.views.generic.list import BaseListView
-from google.appengine.datastore.datastore_query import Cursor
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic.base import TemplateView
-from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import FormView
-from google.appengine.api import datastore_errors
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.api import mail
@@ -18,10 +14,8 @@ try:
     from google.appengine.api.labs import taskqueue
 except ImportError:
     from google.appengine.api import taskqueue
-import webapp2
-from guestbook.forms import SignForm, EditForm, apiForm
-from guestbook.models import Guestbook, Greeting
-from guestbook.api import JSONResponseMixin
+from guestbook.forms import SignForm, EditForm
+from guestbook.models import Guestbook
 
 
 class IndexView(TemplateView):
@@ -57,6 +51,7 @@ class IndexView(TemplateView):
             context['url'] = url
             context['url_linktext']= url_linktext
             return context
+
 class SignView(FormView):
 
         template_name = "guestbook/mainpage.html"
@@ -82,6 +77,7 @@ class SignView(FormView):
             return super(SignView, self).form_invalid(form)
 
 class Send(TemplateView):
+
         #Send mail in get function with params: guestbook_name, author, content
         @ndb.transactional
         def get(self, request, *args, **kwargs):
@@ -95,7 +91,9 @@ class Send(TemplateView):
                 """ %(self.request.GET.get("guestbook_name"), self.request.GET.get("author"), self.request.GET.get("content")))
             #after send mail, generate a message
             return HttpResponse('Email has been sent')
+
 class Delete(TemplateView):
+
         @ndb.transactional
         def get(self, request, *args, **kwargs):
             guestbook_name = self.request.GET.get("guestbook_name")
@@ -105,7 +103,9 @@ class Delete(TemplateView):
                 myGuestbook.delete_greeting(id)
                 return HttpResponseRedirect('/?'+urllib.urlencode({'guestbook_name':guestbook_name}))
             return HttpResponse("You are not administrator :)")
+
 class Edit(FormView):
+
         template_name = "guestbook/edit.html"
         form_class = EditForm
         def get(self, request, *args, **kwargs):
