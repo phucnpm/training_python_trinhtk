@@ -1,7 +1,6 @@
 from django.utils import simplejson as json
 import logging
 from django.http import HttpResponse, Http404
-from django.views.generic.list import BaseListView
 from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.edit import FormView
 from google.appengine.api import datastore_errors
@@ -33,7 +32,6 @@ class search(JSONResponseMixin, FormView):
             curs = Cursor(urlsafe=self.request.GET.get('cursor'))
         except datastore_errors.BadValueError:
             raise Http404
-            return HttpResponse(status=404)
         items, nextcurs, more = Greeting.query(
                     ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(20, start_cursor=curs)
         i = 0
@@ -111,7 +109,6 @@ class searchID(JSONResponseMixin, FormView):
             return HttpResponse(status=204)
         else:
             return HttpResponse(status=404)
-        return HttpResponse(status=404)
     def form_invalid(self, form):
         return HttpResponse(status=400)
     def delete(self, request, *args, **kwargs):
