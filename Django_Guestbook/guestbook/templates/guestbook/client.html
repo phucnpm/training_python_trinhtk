@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheet/main.css" />
+  </head>
+  <body>
+    <form action="/api/guestbook/default_guestbook/greeting/4670450516885504/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="guestbook_name" value="default_guestbook" />
+      <div><textarea name="content" rows="3" cols="60"></textarea></div>
+      <input type="hidden" name="id" value="4670450516885504" />
+      <div><input type="submit" value="Delete Guestbook"></div>
+    </form>
+  </body>
+
+</html>
