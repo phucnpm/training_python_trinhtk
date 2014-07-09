@@ -18,9 +18,18 @@ class Greeting(ndb.Model):
 
     def greeting_to_dict(self):
             if self.last_update:
-                return {'author':self.author, 'content':self.content, 'last updated by':self.updated_by, 'pub date':self.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':self.last_update.strftime("%Y-%m-%d %H:%M +0000")}
+                dict = {'author':self.author,
+                        'content':self.content,
+                        'last updated by':self.updated_by,
+                        'pub date':self.date.strftime("%Y-%m-%d %H:%M +0000"),
+                        'date modify':self.last_update.strftime("%Y-%m-%d %H:%M +0000")}
             else:
-                return {'author':self.author, 'content':self.content, 'last updated by':self.updated_by, 'pub date':self.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':None}
+                dict = {'author':self.author,
+                        'content':self.content,
+                        'last updated by':self.updated_by,
+                        'pub date':self.date.strftime("%Y-%m-%d %H:%M +0000"),
+                        'date modify':None}
+            return dict
     @classmethod
     def get_page(self, guestbook_name, pagesize, cursor=None):
         return Greeting.query(
