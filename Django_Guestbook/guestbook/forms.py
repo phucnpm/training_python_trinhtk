@@ -1,4 +1,6 @@
 from django import  forms
+
+
 class SignForm(forms.Form):
 
     content = forms.CharField(widget=forms.Textarea, required=True, max_length=10)
@@ -12,5 +14,5 @@ class EditForm(forms.Form):
     id = forms.CharField(widget=forms.HiddenInput(attrs={'styles': 'display:none;'}))
 
 class apiForm(forms.Form):
-    
+
     content = forms.CharField(widget=forms.Textarea, required=True, max_length=10)
