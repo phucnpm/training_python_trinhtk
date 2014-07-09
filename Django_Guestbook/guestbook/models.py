@@ -7,8 +7,11 @@ try:
 except ImportError:
     from google.appengine.api import taskqueue
 # Create your models here.
+
 DEFAULT_NAME = 'default_guestbook'
+
 class Greeting(ndb.Model):
+
     #variables
     author = ndb.StringProperty()
     content = ndb.StringProperty()
@@ -30,13 +33,14 @@ class Greeting(ndb.Model):
         return dict
 
     @classmethod
-    def get_page(self, guestbook_name, pagesize, cursor=None):
+    def get_page(cls, guestbook_name, pagesize, cursor=None):
 
         items, nextcurs, more = Greeting.query(
                     ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
         return items, nextcurs, more
 
 class Guestbook(ndb.Model):
+
     name = ndb.StringProperty()
 
     def get_key(self):
