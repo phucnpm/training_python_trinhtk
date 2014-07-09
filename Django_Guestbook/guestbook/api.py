@@ -51,7 +51,8 @@ class Search(JSONResponseMixin, FormView):
         context["guestbook_name"] = guestbook_name
         context["greetings"] = dict_item
         context["more"] = more
-        context["cursor"] = nextcurs.urlsafe()
+        if more:
+            context["cursor"] = nextcurs.urlsafe()
         context["count"] = len(items)
         return self.render_to_response(context)
 # POST /api/guestbook/<guestbook_name>/greeting
@@ -84,7 +85,7 @@ class Search(JSONResponseMixin, FormView):
     def get_context_data(self, **kwargs):
 
         context = super(Search,self).get_context_data(**kwargs)
-        context['guestbook_name'] = self.request.POST.get('guestbook_name')
+        context['guestbook_name'] = self.kwargs('guestbook_name')
         logging.warning('%s' %context['guestbook_name'])
         return context
 
@@ -126,7 +127,8 @@ class SearchID(JSONResponseMixin, FormView):
         id = self.kwargs('id')
         content = self.request.POST.get('content')
         myGuestbook = Guestbook(name=guestbook_name)
-        if users.get_current_user():
+        greeting = myGuestbook.get_greeting_by_id(id)
+        if users.is_current_user_admin() or users.get_current_user().nickname() == greeting.author:
             author = users.get_current_user().nickname()
             myGuestbook.update_greeting(id, content, author)
             return HttpResponse(status=204)

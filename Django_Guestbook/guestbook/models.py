@@ -17,23 +17,21 @@ class Greeting(ndb.Model):
     updated_by = ndb.StringProperty()
 
     def greeting_to_dict(self):
-            if self.last_update:
-                dict = {'author':self.author,
-                        'content':self.content,
-                        'last updated by':self.updated_by,
-                        'pub date':self.date.strftime("%Y-%m-%d %H:%M +0000"),
-                        'date modify':self.last_update.strftime("%Y-%m-%d %H:%M +0000")}
-            else:
-                dict = {'author':self.author,
-                        'content':self.content,
-                        'last updated by':self.updated_by,
-                        'pub date':self.date.strftime("%Y-%m-%d %H:%M +0000"),
-                        'date modify':None}
+        dict = {}
+        dict["author"] = self.author
+        dict['content'] = self.content
+        dict['last udated by'] = self.updated_by
+        dict['pub date'] = self.date.strftime("%Y-%m-%d %H:%M +0000")
+        if self.last_update:
+            dict['date modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0000")
+        else:
+            dict['date modified'] = None
             return dict
     @classmethod
     def get_page(self, guestbook_name, pagesize, cursor=None):
-        return Greeting.query(
+        items, nextcurs, more = Greeting.query(
                     ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
+        return items, nextcurs, more
 
 class Guestbook(ndb.Model):
     name = ndb.StringProperty()
