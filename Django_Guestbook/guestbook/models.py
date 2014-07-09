@@ -26,7 +26,8 @@ class Greeting(ndb.Model):
             dict['date modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0000")
         else:
             dict['date modified'] = None
-            return dict
+        return dict
+    
     @classmethod
     def get_page(self, guestbook_name, pagesize, cursor=None):
         items, nextcurs, more = Greeting.query(
