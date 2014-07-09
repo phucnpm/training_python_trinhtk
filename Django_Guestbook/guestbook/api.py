@@ -65,7 +65,6 @@ class Search(JSONResponseMixin, FormView):
 
     def form_invalid(self, form):
 
-        super(Search, self).form_invalid(form)
         return HttpResponse(status=400)
 
     def form_valid(self, form):
