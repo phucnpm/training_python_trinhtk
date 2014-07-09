@@ -70,7 +70,7 @@ class Search(JSONResponseMixin, FormView):
 
     def form_valid(self, form):
 
-        guestbook_name = self.request.POST.get('guestbook_name')
+        guestbook_name = self.kwargs('guestbook_name')
         myGuestbook = Guestbook(name=guestbook_name)
         content = self.request.POST.get('content')
         if users.get_current_user():
@@ -105,11 +105,10 @@ class SearchID(JSONResponseMixin, FormView):
         myGuestBook = Guestbook(name=guestbook_name)
         x = myGuestBook.get_greeting_by_id(id)
         if x:
-            if x.last_update:
-                dict_item = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':x.last_update.strftime("%Y-%m-%d %H:%M +0000")}
-            else:
-                dict_item = {'author':x.author, 'content':x.content, 'last updated by':x.updated_by, 'pub date':x.date.strftime("%Y-%m-%d %H:%M +0000"), 'date modify':None}
-            context = {'guestbook_name':guestbook_name, 'greetings':dict_item}
+            dict_item = x.greeting_to_dict()
+            context = {}
+            context['guestbook_name'] = guestbook_name
+            context['greetings'] = dict_item
             return self.render_to_response(context)
         else:
             raise Http404
@@ -124,8 +123,8 @@ class SearchID(JSONResponseMixin, FormView):
 
     def form_valid(self, form):
 
-        guestbook_name = self.request.POST.get('guestbook_name')
-        id = self.request.POST.get('id')
+        guestbook_name = self.kwargs('guestbook_name')
+        id = self.kwargs('id')
         content = self.request.POST.get('content')
         myGuestbook = Guestbook(name=guestbook_name)
         if users.get_current_user():
