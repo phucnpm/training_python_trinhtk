@@ -31,7 +31,7 @@ class Greeting(ndb.Model):
 
     @classmethod
     def get_page(self, guestbook_name, pagesize, cursor=None):
-        
+
         items, nextcurs, more = Greeting.query(
                     ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
         return items, nextcurs, more
