@@ -1,6 +1,6 @@
 from django.utils import simplejson as json
 import logging
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.edit import FormView
 from google.appengine.api import datastore_errors
@@ -44,7 +44,7 @@ class Search(JSONResponseMixin, FormView):
         try:
             curs = Cursor(urlsafe=self.request.GET.get('cursor'))
         except datastore_errors.BadValueError:
-            raise Http404
+            return HttpResponse(status=404)
         items, nextcurs, more = Greeting.get_page(guestbook_name,20,curs)
         dict_item = [x.greeting_to_dict() for x in items]
         context = {}
@@ -111,7 +111,7 @@ class SearchID(JSONResponseMixin, FormView):
             context['greetings'] = dict_item
             return self.render_to_response(context)
         else:
-            raise Http404
+            return HttpResponse(status=404)
 
 # PUT /api/guestbook/<guestbook_name>/greeting/<id>
 #
