@@ -1,4 +1,6 @@
 import datetime
+import logging
+
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.api import users
@@ -83,7 +85,7 @@ class Guestbook(ndb.Model):
 
     @ndb.transactional
     def get_greeting_by_id(self, id):
-
+        logging.warning(ndb.Key(Guestbook, self.name, Greeting, int(id)).get())
         return ndb.Key(Guestbook, self.name, Greeting, int(id)).get()
 
     @classmethod
