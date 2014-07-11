@@ -54,6 +54,17 @@ class Guestbook(ndb.Model):
         return Greeting.query(
                     ancestor= self.get_key()).order(-Greeting.date).fetch(count)
 
+    def get_latest_memcache(self, count):
+        greetings = memcache.get("%s:greetings" %self.name)
+        if greetings is None:
+            logging.warning("Memcache none")
+            #Get data from database
+            greetings = self.get_latest(count)
+            #Then cache these data, if app can't cache, give an error message
+            if not memcache.add("%s:greetings" %self.name, greetings, 10000):
+                logging.error("Memcache set failed")
+        return greetings
+
     @ndb.transactional
     def put_greeting(self, author, content):
 
@@ -90,5 +101,4 @@ class Guestbook(ndb.Model):
 
     @classmethod
     def get_default_name(cls):
-
         return DEFAULT_NAME

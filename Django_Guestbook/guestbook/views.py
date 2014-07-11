@@ -26,13 +26,7 @@ class IndexView(TemplateView):
         def get_context_data(self, **kwargs):
             guestbook_name = self.request.GET.get('guestbook_name', 'default_guestbook')
             myGuestbook = Guestbook(name= guestbook_name)
-            greetings = memcache.get("%s:greetings" %myGuestbook.name)
-            if greetings is None:
-                #Get data from database
-                greetings = myGuestbook.get_latest(self.DEFAULT_PAGE_SIZE)
-                #Then cache these data, if app can't cache, give an error message
-                if not memcache.add("%s:greetings" %myGuestbook.name, greetings, 10000):
-                    logging.error("Memcache set failed")
+            greetings = myGuestbook.get_latest_memcache(self.DEFAULT_PAGE_SIZE)
             context = super(IndexView,self).get_context_data(**kwargs)
             #Check whether user loged in
             if users.get_current_user():
