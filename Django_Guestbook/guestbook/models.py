@@ -55,6 +55,7 @@ class Guestbook(ndb.Model):
                     ancestor= self.get_key()).order(-Greeting.date).fetch(count)
 
     def get_latest_memcache(self, count):
+
         greetings = memcache.get("%s:greetings" %self.name)
         if greetings is None:
             logging.warning("Memcache none")
