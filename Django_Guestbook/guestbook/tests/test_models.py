@@ -1,10 +1,8 @@
 import logging
-from google.appengine.api import memcache
 from google.appengine.ext import testbed
 from google.appengine.ext import ndb
 import unittest
 from guestbook.models import Greeting, Guestbook
-from mock import patch
 
 
 class MyFirstTest(unittest.TestCase):
