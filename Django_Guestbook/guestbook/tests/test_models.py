@@ -4,7 +4,7 @@ from google.appengine.ext import testbed
 from google.appengine.ext import ndb
 import unittest
 from guestbook.models import Greeting, Guestbook
-from mock import MagicMock, Mock
+from mock import patch
 
 
 class MyFirstTest(unittest.TestCase):
@@ -124,16 +124,24 @@ class MyFirstTest(unittest.TestCase):
         greeting = self.myGuestbook.get_greeting_by_id(id)
         assert greeting.content == content and greeting.updated_by == user
 
-    #test function Guestbook.get_latest_memcache(self, count):
-    def test_function_guestbook_get_latest_memcache(self):
+    #test function Guestbook.get_latest_memcache(self, count) without cache:
+    def test_get_latest_no_cache(self):
+        from mock import patch
+        with patch('google.appengine.api.memcache.get') as func:
+            func.return_value = None
+            greetings = self.myGuestbook.get_latest_memcache(5)
+            assert len(greetings) == 5
+            func.assert_called_with("%s:greetings" %self.guestbook_name)
 
-        #fake data return from cache
-        #suppose memcache has just one greeting with id = 4
-        id = 4
-        greeting = self.myGuestbook.get_greeting_by_id(id)
-        mock = Mock(return_value = greeting)
-        greeting = self.myGuestbook.get_latest_memcache(1)
-        assert greeting == mock
+    #test function Guestbook.get_latest_memcache(self, count) with cache:
+    def test_get_latest_with_cache(self):
+        from mock import patch
+        with patch('google.appengine.api.memcache.get') as func:
+            val_return = self.myGuestbook.get_latest(5)
+            func.return_value = val_return
+            greetings = self.myGuestbook.get_latest_memcache(5)
+            assert greetings == self.myGuestbook.get_latest(5)
+            func.assert_called_with("%s:greetings" %self.guestbook_name)
 
 if __name__ == '__main__':
     unittest.main()
