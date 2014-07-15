@@ -176,8 +176,8 @@ class TestGuestbook(TestBaseClass):
     def test_get_latest_with_cache(self):
         from mock import patch
         with patch('google.appengine.api.memcache.get') as func:
-            val_return = self.myGuestbook.get_latest(5)
+            val_return = "VALUE RETURN"
             func.return_value = val_return
-            greetings = self.myGuestbook.get_latest_memcache(5)
-            assert greetings == self.myGuestbook.get_latest(5)
+            greetings = self.myGuestbook.get_latest_memcache(1)
+            assert greetings == "VALUE RETURN"
             func.assert_called_with("%s:greetings" % self.guestbook_name)
