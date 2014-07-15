@@ -20,7 +20,7 @@ class TestBaseClass():
         self.testbed.init_user_stub()
         # create test DB
         i = 0
-        while i < 19:
+        while i <= 19:
             key = Greeting(parent=self.myGuestbook.get_key(), author="Author test %s" % i,
                            content='Content test %s' % i).put()
             i += 1
@@ -33,12 +33,40 @@ class TestBaseClass():
 class Test_Greeting(TestBaseClass):
 
     #test function Greeting.get_page(cls, guestbook_name, pagesize, cursor=None):
-    def test_greeting_get_page(self):
+    #load 10, len = 10
+    def test_greeting_get_page_len_less_than_total(self):
         curs = None
         pagesize = 10
-        assert Greeting.get_page(self.guestbook_name, pagesize, curs) == Greeting.query(
-            ancestor=ndb.Key(Guestbook, self.guestbook_name))\
-            .order(-Greeting.date).fetch_page(pagesize, start_cursor=curs)
+        ndbs, cursor, more = Greeting.get_page(self.guestbook_name, pagesize, curs)
+        assert len(ndbs) == 10
+
+    #load 30, max = 20
+    def test_greeting_get_page_len_greater_than_total(self):
+        curs = None
+        pagesize = 30
+        ndbs, cursor, more = Greeting.get_page(self.guestbook_name, pagesize, curs)
+        assert len(ndbs) >= 20 and len(ndbs) < 30
+
+    #load = 0
+    def test_greeting_get_page_len_equal_zero(self):
+        curs = None
+        pagesize = 0
+        ndbs, cursor, more = Greeting.get_page(self.guestbook_name, pagesize, curs)
+        assert ndbs is None
+
+    #load < 0
+    def test_greeting_get_page_len_less_than_zero(self):
+        curs = None
+        pagesize = -1
+        ndbs, cursor, more = Greeting.get_page(self.guestbook_name, pagesize, curs)
+        assert ndbs is None
+
+    # dust curs
+    def test_greeting_get_page_dust_curs(self):
+        curs = "asdosdhfoiqhio341"
+        pagesize = 10
+        ndbs, cursor, more = Greeting.get_page(self.guestbook_name, pagesize, curs)
+        assert ndbs is None
 
     #test function Greeting.greeting_to_dict(self):
     def test_greeting_to_dict(self):
