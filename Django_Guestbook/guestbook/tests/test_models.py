@@ -103,18 +103,24 @@ class TestGuestbook(TestBaseClass):
     #test function Guestbook.delete_greeting(self, id):
     def test_guestbook_delete_greeting(self):
         #delete id = 1
-        id = 1
+        cursor = None
+        more = True
+        total = self.count_db(cursor, more)
+        #total = 20
+        mygreeting = self.myGuestbook.get_latest(1)
+        id = mygreeting[0].key.id()
         self.myGuestbook.delete_greeting(id)
-        assert None == self.myGuestbook.get_greeting_by_id(id)
+        cursor = None
+        more = True
+        total_new = self.count_db(cursor, more)
+        #total_new = 19
+        assert total == total_new + 1
 
     #test function Guestbook.get_greeting_by_id(self, id):
     def test_guestbook_get_greeting_by_id(self):
-        myguestbook = Guestbook(name=self.guestbook_name)
-        #get greeting where id = 2
-        id = 2
-        greeting_man = myguestbook.get_greeting_by_id(id)
-        greeting_func = ndb.Key(Guestbook, self.guestbook_name, Greeting, int(id)).get()
-        assert greeting_man == greeting_func
+        mygreeting = self.myGuestbook.get_latest(1)[0]
+        id = mygreeting.key.id()
+        assert mygreeting == self.myGuestbook.get_greeting_by_id(id)
 
     #test function Guestbook.get_default_name(cls):
     def test_guestbook_get_default_name(self):
