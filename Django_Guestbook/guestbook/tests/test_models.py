@@ -1,16 +1,18 @@
 import logging
 from google.appengine.ext import testbed
 from google.appengine.ext import ndb
-import unittest
+import pytest
 from guestbook.models import Greeting, Guestbook
 
 
-class MyFirstTest(unittest.TestCase):
+class TestBaseClass():
 
     guestbook_name = "default_guestbook"
     myGuestbook = Guestbook(name=guestbook_name)
 
-    def setUp(self):
+
+    def setup_method(self, method):
+
         self.testbed = testbed.Testbed()
         # Then activate the testbed, which prepares the service stubs for use.
         self.testbed.activate()
@@ -18,18 +20,22 @@ class MyFirstTest(unittest.TestCase):
         self.testbed.init_datastore_v3_stub()
         self.testbed.init_memcache_stub()
         self.testbed.init_user_stub()
-
         # create test DB
         i = 0
         while i < 19:
             key = Greeting(parent=self.myGuestbook.get_key(),author="Author test %s" %i, content='Content test %s' %i).put()
             i +=1
 
-    def tearDown(self):
-      self.testbed.deactivate()
+    def teardown_method(self, method):
+
+        self.testbed.deactivate()
+
+#=======TEST FOR GREETING CLASS========
+class TestGreeting(TestBaseClass):
 
     #test function Greeting.get_page(cls, guestbook_name, pagesize, cursor=None):
     def test_greeting_get_page(self):
+
         curs = None
         pagesize = 10
         assert Greeting.get_page(self.guestbook_name, pagesize, curs) == Greeting.query(
@@ -37,6 +43,7 @@ class MyFirstTest(unittest.TestCase):
 
     #test function Greeting.greeting_to_dict(self):
     def test_greeting_to_dict(self):
+
         greeting = Greeting.query(Greeting.content == "Content test 1", Greeting.author=="Author test 1").fetch(1)[0]
         id = greeting.key.id()
         myGreeting = self.myGuestbook.get_greeting_by_id(id)
@@ -47,6 +54,9 @@ class MyFirstTest(unittest.TestCase):
         dict['pub date'] = myGreeting.date.strftime("%Y-%m-%d %H:%M +0000")
         dict['date modified'] = None
         assert dict == myGreeting.greeting_to_dict()
+
+#=======TEST FOR GUESTBOOK CLASS========
+class TestGuestbook(TestBaseClass):
 
     #test function Guestbook.get_key(self):
     def test_guestbook_get_key(self):
@@ -140,6 +150,3 @@ class MyFirstTest(unittest.TestCase):
             greetings = self.myGuestbook.get_latest_memcache(5)
             assert greetings == self.myGuestbook.get_latest(5)
             func.assert_called_with("%s:greetings" %self.guestbook_name)
-
-if __name__ == '__main__':
-    unittest.main()
