@@ -86,22 +86,22 @@ class Test_Greeting(TestBaseClass):
 #=======TEST FOR GUESTBOOK CLASS========
 class TestGuestbook(TestBaseClass):
 
-    #test function Guestbook.get_key(self):
-    def test_guestbook_get_key(self):
-
-        assert self.myGuestbook.get_key() == ndb.Key("Guestbook", self.guestbook_name)
-
     #test function Guestbook.get_latest(self, count):
     def test_guestbook_get_latest(self):
-
-        count = 10
+        author1 = "Author added 1"
+        content1 = "Content added 1"
+        author2 = "Author added 2"
+        content2 = "Content added 2"
+        self.myGuestbook.put_greeting(author1, content1)
+        self.myGuestbook.put_greeting(author2, content2)
+        count = 2
         listgreeting = Greeting.query(
             ancestor=self.myGuestbook.get_key()).order(-Greeting.date).fetch(count)
-        assert listgreeting == self.myGuestbook.get_latest(count)
+        #list[0] = (content2, author2) --- list[1] = (content1, author1)
+        assert listgreeting[0].content == content2 and listgreeting[1].content == content1
 
     #test function Guestbook.delete_greeting(self, id):
     def test_guestbook_delete_greeting(self):
-
         #delete id = 1
         id = 1
         self.myGuestbook.delete_greeting(id)
@@ -128,7 +128,6 @@ class TestGuestbook(TestBaseClass):
         cursor = None
         more = True
         total = self.count_db(cursor, more)
-        logging.warning(total)
         #number of greetings after put
         self.myGuestbook.put_greeting(author, content)
         cursor = None
@@ -149,7 +148,6 @@ class TestGuestbook(TestBaseClass):
 
     #test function Guestbook.update_greeting(self, id, content, user):
     def test_fucntion_guestbook_update_greeting(self):
-
         #update greeting where id = 3
         id = 3
         content = "Content updated"
