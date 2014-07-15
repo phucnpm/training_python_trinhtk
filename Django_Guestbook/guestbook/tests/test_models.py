@@ -10,9 +10,7 @@ class TestBaseClass():
     guestbook_name = "default_guestbook"
     myGuestbook = Guestbook(name=guestbook_name)
 
-
     def setup_method(self, method):
-
         self.testbed = testbed.Testbed()
         # Then activate the testbed, which prepares the service stubs for use.
         self.testbed.activate()
@@ -23,37 +21,39 @@ class TestBaseClass():
         # create test DB
         i = 0
         while i < 19:
-            key = Greeting(parent=self.myGuestbook.get_key(),author="Author test %s" %i, content='Content test %s' %i).put()
-            i +=1
+            key = Greeting(parent=self.myGuestbook.get_key(), author="Author test %s" % i,
+                           content='Content test %s' % i).put()
+            i += 1
 
     def teardown_method(self, method):
-
         self.testbed.deactivate()
 
+
 #=======TEST FOR GREETING CLASS========
-class TestGreeting(TestBaseClass):
+class Test_Greeting(TestBaseClass):
 
     #test function Greeting.get_page(cls, guestbook_name, pagesize, cursor=None):
     def test_greeting_get_page(self):
-
         curs = None
         pagesize = 10
         assert Greeting.get_page(self.guestbook_name, pagesize, curs) == Greeting.query(
-                    ancestor= ndb.Key(Guestbook, self.guestbook_name)).order(-Greeting.date).fetch_page(pagesize, start_cursor=curs)
+            ancestor=ndb.Key(Guestbook, self.guestbook_name))\
+            .order(-Greeting.date).fetch_page(pagesize, start_cursor=curs)
 
     #test function Greeting.greeting_to_dict(self):
     def test_greeting_to_dict(self):
-
-        greeting = Greeting.query(Greeting.content == "Content test 1", Greeting.author=="Author test 1").fetch(1)[0]
+        greeting = Greeting.query(Greeting.content == "Content test 1",
+                                  Greeting.author == "Author test 1").fetch(1)[0]
         id = greeting.key.id()
-        myGreeting = self.myGuestbook.get_greeting_by_id(id)
+        mygreeting = self.myGuestbook.get_greeting_by_id(id)
         dict = {}
         dict["author"] = "Author test 1"
         dict['content'] = "Content test 1"
         dict['last udated by'] = None
-        dict['pub date'] = myGreeting.date.strftime("%Y-%m-%d %H:%M +0000")
+        dict['pub date'] = mygreeting.date.strftime("%Y-%m-%d %H:%M +0000")
         dict['date modified'] = None
-        assert dict == myGreeting.greeting_to_dict()
+        assert dict == mygreeting.greeting_to_dict()
+
 
 #=======TEST FOR GUESTBOOK CLASS========
 class TestGuestbook(TestBaseClass):
@@ -67,9 +67,9 @@ class TestGuestbook(TestBaseClass):
     def test_guestbook_get_latest(self):
 
         count = 10
-        listGreeting = Greeting.query(
-                    ancestor= self.myGuestbook.get_key()).order(-Greeting.date).fetch(count)
-        assert listGreeting == self.myGuestbook.get_latest(count)
+        listgreeting = Greeting.query(
+            ancestor=self.myGuestbook.get_key()).order(-Greeting.date).fetch(count)
+        assert listgreeting == self.myGuestbook.get_latest(count)
 
     #test function Guestbook.delete_greeting(self, id):
     def test_guestbook_delete_greeting(self):
@@ -81,10 +81,10 @@ class TestGuestbook(TestBaseClass):
 
     #test function Guestbook.get_greeting_by_id(self, id):
     def test_guestbook_get_greeting_by_id(self):
-        myGuestbook = Guestbook(name= self.guestbook_name)
+        myguestbook = Guestbook(name=self.guestbook_name)
         #get greeting where id = 2
         id = 2
-        greeting_man = myGuestbook.get_greeting_by_id(id)
+        greeting_man = myguestbook.get_greeting_by_id(id)
         greeting_func = ndb.Key(Guestbook, self.guestbook_name, Greeting, int(id)).get()
         assert greeting_man == greeting_func
 
@@ -94,7 +94,6 @@ class TestGuestbook(TestBaseClass):
 
     #test function Guestbook.put_greeting(self, author, content):
     def test_function_guestbook_put_greeting(self):
-
         author = "Author added"
         content = "Content added"
         #count number of greetings before put
@@ -107,7 +106,7 @@ class TestGuestbook(TestBaseClass):
         cursor = None
         more = True
         total_new = self.count_db(cursor, more)
-        assert total == total_new -1
+        assert total == total_new - 1
 
     #function count db
     def count_db(self, cursor=None, more=True):
@@ -116,7 +115,7 @@ class TestGuestbook(TestBaseClass):
         more = True
         total = 0
         while more:
-            ndbs, cursor, more = Greeting.get_page(self.guestbook_name,self.LIMIT,cursor)
+            ndbs, cursor, more = Greeting.get_page(self.guestbook_name, self.LIMIT, cursor)
             total += len(ndbs)
         return total
 
@@ -139,7 +138,7 @@ class TestGuestbook(TestBaseClass):
             func.return_value = None
             greetings = self.myGuestbook.get_latest_memcache(5)
             assert len(greetings) == 5
-            func.assert_called_with("%s:greetings" %self.guestbook_name)
+            func.assert_called_with("%s:greetings" % self.guestbook_name)
 
     #test function Guestbook.get_latest_memcache(self, count) with cache:
     def test_get_latest_with_cache(self):
@@ -149,4 +148,4 @@ class TestGuestbook(TestBaseClass):
             func.return_value = val_return
             greetings = self.myGuestbook.get_latest_memcache(5)
             assert greetings == self.myGuestbook.get_latest(5)
-            func.assert_called_with("%s:greetings" %self.guestbook_name)
+            func.assert_called_with("%s:greetings" % self.guestbook_name)

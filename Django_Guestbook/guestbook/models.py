@@ -12,8 +12,8 @@ except ImportError:
 
 DEFAULT_NAME = 'default_guestbook'
 
-class Greeting(ndb.Model):
 
+class Greeting(ndb.Model):
     #variables
     author = ndb.StringProperty()
     content = ndb.StringProperty()
@@ -38,62 +38,66 @@ class Greeting(ndb.Model):
     def get_page(cls, guestbook_name, pagesize, cursor=None):
 
         items, nextcurs, more = Greeting.query(
-                    ancestor= ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
+            ancestor=ndb.Key(Guestbook, guestbook_name))\
+            .order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
         return items, nextcurs, more
 
-class Guestbook(ndb.Model):
 
+class Guestbook(ndb.Model):
     name = ndb.StringProperty()
 
     def get_key(self):
-
         return ndb.Key(Guestbook, self.name or self.get_default_name())
 
     def get_latest(self, count):
-
         return Greeting.query(
-                    ancestor= self.get_key()).order(-Greeting.date).fetch(count)
+            ancestor=self.get_key()).order(-Greeting.date).fetch(count)
 
     def get_latest_memcache(self, count):
-
-        greetings = memcache.get("%s:greetings" %self.name)
+        greetings = memcache.get("%s:greetings" % self.name)
         if greetings is None:
             logging.warning("Memcache none")
             #Get data from database
             greetings = self.get_latest(count)
             #Then cache these data, if app can't cache, give an error message
-            if not memcache.add("%s:greetings" %self.name, greetings, 10000):
+            if not memcache.add("%s:greetings" % self.name, greetings, 10000):
                 logging.error("Memcache set failed")
         return greetings
 
     @ndb.transactional
     def put_greeting(self, author, content):
-
-        greeting = Greeting(parent=self.get_key(), author= author, content= content)
+        greeting = Greeting(parent=self.get_key(), author=author, content=content)
         if greeting.put():
             if users.get_current_user():
-                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':self.name, 'author':users.get_current_user().nickname(), 'content':content})
+                taskqueue.add(url='/send/',
+                              method='GET',
+                              params={'guestbook_name': self.name,
+                                      'author': users.get_current_user().nickname(),
+                                      'content': content})
             else:
-                taskqueue.add(url='/send/',method='GET', params={'guestbook_name':self.name, 'author': None, 'content':content})
-            memcache.delete("%s:greetings" %self.name)
+                taskqueue.add(url='/send/', method='GET',
+                              params={'guestbook_name': self.name,
+                                      'author': None,
+                                      'content': content})
+            memcache.delete("%s:greetings" % self.name)
 
     @ndb.transactional
     def delete_greeting(self, id):
 
         key = ndb.Key(Guestbook, self.name, Greeting, int(id))
         key.delete()
-        memcache.delete("%s:greetings" %self.name)
+        memcache.delete("%s:greetings" % self.name)
 
     @ndb.transactional
     def update_greeting(self, id, content, user):
 
         key = ndb.Key(Guestbook, self.name, Greeting, int(id))
-        myGreeting = key.get()
-        myGreeting.content = content
-        myGreeting.updated_by = user
-        myGreeting.last_update = datetime.datetime.now()
-        if myGreeting.put():
-            memcache.delete("%s:greetings" %self.name)
+        mygreeting = key.get()
+        mygreeting.content = content
+        mygreeting.updated_by = user
+        mygreeting.last_update = datetime.datetime.now()
+        if mygreeting.put():
+            memcache.delete("%s:greetings" % self.name)
 
     @ndb.transactional
     def get_greeting_by_id(self, id):
