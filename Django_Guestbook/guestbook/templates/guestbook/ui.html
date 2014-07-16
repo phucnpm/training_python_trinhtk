@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/soria/soria.css" />
+</head>
+<body>
+<script type="text/javascript">
+{% autoescape off %}
+var dojoConfig = {
+	baseUrl: '//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo',
+	paths: {
+		'guestbook': '/static/js/guestbook'
+	}
+};
+{% endautoescape %}
+</script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
+<script type="text/javascript">
+	require(['guestbook/app']);
+</script>
+</body>
+</html>
