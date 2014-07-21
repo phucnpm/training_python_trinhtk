@@ -1,7 +1,7 @@
 from django.conf.urls import *
 from django.views.generic import TemplateView
 from guestbook.api import Search, SearchID
-from guestbook.views import SignView, IndexView, Send, Delete, Edit
+from guestbook.views import SignView, IndexView, Send, Delete, Edit, UI
 
 
 urlpatterns = patterns('',
@@ -12,8 +12,11 @@ urlpatterns = patterns('',
     url(r'^edit/$', Edit.as_view(), name ='edit'),
     url(r'^api/guestbook/(?P<guestbook_name>[a-zA-Z0-9\s\+\_]+)/greeting/$',
         Search.as_view()),
-    url(r'^api/guestbook/(?P<guestbook_name>[a-zA-Z0-9\s\+\_]+)/greeting/(?P<id>[a-zA-Z0-9\s\+\_]+)/$',
+    url(r'^api/guestbook/'
+        r'(?P<guestbook_name>[a-zA-Z0-9\s\+\_]+)/greeting/(?P<id>[a-zA-Z0-9\s\+\_]+)/$',
         SearchID.as_view()),
     url(r'^client/?$',
         TemplateView.as_view(template_name='guestbook/client.html')),
+    url(r'^ui/(?P<guestbook_name>[a-zA-Z0-9\s\+\_]+)$',
+        UI.as_view(), name='ui')
 )

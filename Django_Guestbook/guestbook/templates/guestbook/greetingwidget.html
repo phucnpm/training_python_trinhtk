@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Greetings List</title>
+    <script>
+        var dojoConfig = {
+            baseUrl: '//ajax.googaleapis.com/ajax/libs/dojo/1.10.0/dojo',
+            paths: {
+                'greeting': '/static/js/guestbook'
+            }
+        };
+    </script>
+</head>
+    <body>
+        <div id="greetingContainer"></div>
+        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
+        <script>
+            require([
+                        "dojo/request",
+                        "dojo/dom",
+                        "dojo/_base/array",
+                        "/static/js/guestbook/widget/GreetingWidget.js",
+                        "dojo/domReady!"],
+            function(request, dom, arrayUtil, GreetingWidget){
+            request("/api/guestbook/{{ guestbook_name }}/greeting/", {
+                handleAs: "json"
+            }).then(function(data){
+                var greetingContainer = dom.byId("greetingContainer");
+                arrayUtil.forEach(data.greetings, function(greeting){
+                        var widget = new GreetingWidget(greeting).placeAt(greetingContainer);
+                });
+            });
+        });
+        </script>
+    </body>
+</html>
