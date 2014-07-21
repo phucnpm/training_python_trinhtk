@@ -1,11 +1,3 @@
-///**
-// * Created by admin on 7/21/14.
-// */
-///**
-// * Created by admin on 7/21/14.
-// * GuestbookWidget.js
-// */
-//
 define([
     "dojo/_base/declare",
     "dojo/_base/fx",
@@ -19,9 +11,6 @@ define([
 ], function(declare, baseFx, lang, domStyle, mouse, on, _WidgetBase, _TemplatedMixin, template){
     return declare([_WidgetBase, _TemplatedMixin], {
         author: "No Name",
-//      Link myapp defined in dojoConfig paths: {
-//                'myapp': '/static/js/myapp'
-//            }
         content: "",
         pub_date: "",
         last_udated: "",
