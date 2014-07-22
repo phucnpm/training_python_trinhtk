@@ -39,7 +39,7 @@ class IndexView(TemplateView):
                 #Create link login & text
                 url = users.create_login_url(self.request.get_full_path())
                 url_linktext = 'Login'
-
+            context['is_logging'] = users.get_current_user()
             context['is_admin'] = users.is_current_user_admin()
             context['greetings'] = greetings
             context['guestbook_name'] = myGuestbook.name

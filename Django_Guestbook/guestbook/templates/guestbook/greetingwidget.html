@@ -11,9 +11,13 @@
             }
         };
     </script>
+     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 </head>
     <body>
+    <form id="postForm">
+    {% csrf_token %}
         <div id="greetingContainer"></div>
+        <div id="guestbook"></div>
         <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
         <script>
             require([
@@ -33,5 +37,18 @@
             });
         });
         </script>
+        <script>
+            require([
+                        "dojo/dom",
+                        "/static/js/guestbook/widget/GuestbookWidget.js",
+                        "dojo/domReady!"],
+            function(dom, GuestbookWidget) {
+                var guestbookContainer = dom.byId("guestbook");
+                var widget = new GuestbookWidget().placeAt(guestbookContainer);
+            }
+
+            );
+        </script>
+    </form>
     </body>
 </html>

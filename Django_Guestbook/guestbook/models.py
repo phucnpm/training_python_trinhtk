@@ -24,7 +24,10 @@ class Greeting(ndb.Model):
     def greeting_to_dict(self):
 
         dict = {}
-        dict["author"] = self.author
+        if(self.author):
+            dict["author"] = self.author
+        else:
+            dict["author"] = "An anonymous"
         dict['content'] = self.content
         dict['last_udated_by'] = self.updated_by
         dict['pub_date'] = self.date.strftime("%Y-%m-%d %H:%M +0000")
@@ -88,7 +91,8 @@ class Guestbook(ndb.Model):
                                       'author': None,
                                       'content': content})
             memcache.delete("%s:greetings" % self.name)
-
+            return True
+        return False
     @ndb.transactional
     def delete_greeting(self, id):
 

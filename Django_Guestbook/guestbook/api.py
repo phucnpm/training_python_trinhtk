@@ -41,7 +41,7 @@ class Search(JSONResponseMixin, FormView):
             curs = Cursor(urlsafe=self.request.GET.get('cursor'))
         except datastore_errors.BadValueError:
             return HttpResponse(status=404)
-        items, nextcurs, more = Greeting.get_page(guestbook_name, 20, curs)
+        items, nextcurs, more = Greeting.get_page(guestbook_name, 10, curs)
         dict_item = [x.greeting_to_dict() for x in items]
         context = {}
         context["guestbook_name"] = guestbook_name
@@ -64,14 +64,15 @@ class Search(JSONResponseMixin, FormView):
         return HttpResponse(status=400)
 
     def form_valid(self, form):
-        guestbook_name = self.kwargs('guestbook_name')
+        guestbook_name = self.kwargs['guestbook_name']
+        #guestbook_name = "default_guestbook"
         myguestbook = Guestbook(name=guestbook_name)
         content = self.request.POST.get('content')
         if users.get_current_user():
             author = users.get_current_user().nickname()
         else:
             author = None
-        if Greeting(parent=myguestbook.get_key(), author=author, content=content):
+        if myguestbook.put_greeting(author, content):
             return HttpResponse(status=204)
         else:
             return HttpResponse(status=404)
