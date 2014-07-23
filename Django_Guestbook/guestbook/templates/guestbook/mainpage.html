@@ -1,39 +1,39 @@
 <html>
-  <head>
+<head>
     <link type="text/css" rel="stylesheet" href="/stylesheet/main.css" />
-  </head>
-  <body>
-    {% for greeting in greetings %}
-      {% if greeting.author %}
+</head>
+<body>
+{% for greeting in greetings %}
+    {% if greeting.author %}
         <b>{{ greeting.author }}</b> wrote:
-      {% else %}
+    {% else %}
         An anonymous person wrote:
-      {% endif %}
-      <blockquote>{{ greeting.content|escape }}</blockquote>
-        {% if greeting.updated_by %}
-            Last update at : {{ greeting.last_update }}<br/>
-            Updated by: {{ greeting.updated_by }}<br/><br/>
-        {% endif %}
-      {% if is_logging %}
-      {% if is_admin or current_user == greeting.author %}
-          {% if is_admin %}
+    {% endif %}
+    <blockquote>{{ greeting.content|escape }}</blockquote>
+    {% if greeting.updated_by %}
+        Last update at : {{ greeting.last_update }}<br/>
+        Updated by: {{ greeting.updated_by }}<br/><br/>
+    {% endif %}
+    {% if is_logging %}
+        {% if is_admin or current_user == greeting.author %}
+            {% if is_admin %}
                 <a href="delete/?guestbook_name={{ guestbook_name }}&id={{ greeting.key.id }}">Delete</a>
-          {% endif %}
-          <a href="edit/?guestbook_name={{ guestbook_name }}&id={{ greeting.key.id }}">Edit</a><br/>
+            {% endif %}
+            <a href="edit/?guestbook_name={{ guestbook_name }}&id={{ greeting.key.id }}">Edit</a><br/>
         {% endif %}
-       {% endif %}
-    {% endfor %}
+    {% endif %}
+{% endfor %}
 
-    <form action="/sign/" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="guestbook_name" value="{{ guestbook_name }}" />
-      <div><textarea name="content" rows="3" cols="60"></textarea></div>
-      <div><input type="submit" value="Sign Guestbook"></div>
-    </form>
-     <form>Guestbook name: <input value="{{ guestbook_name }}" name="guestbook_name">
+<form action="/sign/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="guestbook_name" value="{{ guestbook_name }}" />
+    <div><textarea name="content" rows="3" cols="60"></textarea></div>
+    <div><input type="submit" value="Sign Guestbook"></div>
+</form>
+<form>Guestbook name: <input value="{{ guestbook_name }}" name="guestbook_name">
     <input type="submit" value="switch"></form>
-    <a href="{{ url }}">{{ url_linktext }}</a>
+<a href="{{ url }}">{{ url_linktext }}</a>
 
-  </body>
+</body>
 
 </html>

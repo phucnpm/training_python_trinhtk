@@ -45,7 +45,7 @@ class Greeting(ndb.Model):
             more = None
         try:
             items, nextcurs, more = Greeting.query(
-                ancestor=ndb.Key(Guestbook, guestbook_name))\
+                ancestor=ndb.Key(Guestbook, guestbook_name)) \
                 .order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
         except:
             items = None

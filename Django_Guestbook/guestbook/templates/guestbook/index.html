@@ -7,27 +7,26 @@
         var dojoConfig = {
             baseUrl: '//ajax.googaleapis.com/ajax/libs/dojo/1.10.0/dojo',
             paths: {
-                'widget': '/static/js/guestbook/widget'
+                'guestbook': '/static/js/guestbook'
             },
-            parseOnLoad : true,
-            async : true
+            parseOnLoad : true
+            {#            async : true#}
         };
     </script>
 </head>
-    <body>
-    <form id="postForm">
-    {% csrf_token %}
-        <div id="greetingContainer"></div>
-        <div id="guestbook"></div>
-        <span data-dojo-type="app.FirstWidget"data-dojo-props="guestbook:'default_guestbook'"></span>
-        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
-        <script type="text/javascript">
+<body>
+
+{% csrf_token %}
+<div id="greetingContainer"></div>
+<span data-dojo-type="app.FirstWidget"data-dojo-props="guestbook:'{{ guestbook_name }}'"></span>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
+<script type="text/javascript">
     require([
-        "widget/GuestbookWidget",
+        "guestbook/widget/GuestbookWidget",
         "dojo/domReady!"
     ]);
 </script>
 
-    </form>
-    </body>
+
+</body>
 </html>
