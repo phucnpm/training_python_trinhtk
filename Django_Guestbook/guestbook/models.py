@@ -24,7 +24,7 @@ class Greeting(ndb.Model):
     def greeting_to_dict(self):
 
         dict = {}
-        if(self.author):
+        if self.author:
             dict["author"] = self.author
         else:
             dict["author"] = "An anonymous"

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Greetings List</title>
+    <script>
+        var dojoConfig = {
+            baseUrl: '//ajax.googaleapis.com/ajax/libs/dojo/1.10.0/dojo',
+            paths: {
+                'widget': '/static/js/guestbook/widget'
+            },
+            parseOnLoad : true,
+            async : true
+        };
+    </script>
+</head>
+    <body>
+    <form id="postForm">
+    {% csrf_token %}
+        <div id="greetingContainer"></div>
+        <div id="guestbook"></div>
+        <span data-dojo-type="app.FirstWidget"data-dojo-props="guestbook:'default_guestbook'"></span>
+        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
+        <script type="text/javascript">
+    require([
+        "widget/GuestbookWidget",
+        "dojo/domReady!"
+    ]);
+</script>
+
+    </form>
+    </body>
+</html>

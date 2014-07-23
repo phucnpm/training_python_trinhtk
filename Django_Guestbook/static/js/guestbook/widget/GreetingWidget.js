@@ -10,7 +10,7 @@ define([
     "dojo/text!./templates/GreetingWidget.html"
 ], function(declare, baseFx, lang, domStyle, mouse, on, _WidgetBase, _TemplatedMixin, template){
     return declare([_WidgetBase, _TemplatedMixin], {
-        author: "No Name",
+        author: "No name",
         content: "",
         pub_date: "",
         last_udated: "",
@@ -22,13 +22,14 @@ define([
         mouseBackgroundColor: "#def",
 
         postCreate: function(){
-        var domNode = this.domNode;
-        this.inherited(arguments);
-        domStyle.set(domNode, "backgroundColor", this.baseBackgroundColor);
-        this.own(
-            on(domNode, mouse.enter, lang.hitch(this, "_changeBackground", this.mouseBackgroundColor)),
-            on(domNode, mouse.leave, lang.hitch(this, "_changeBackground", this.baseBackgroundColor))
-        );
+            var domNode = this.domNode;
+            this.inherited(arguments);
+            domStyle.set(domNode, "backgroundColor", this.baseBackgroundColor);
+
+            this.own(
+                on(domNode, mouse.enter, lang.hitch(this, "_changeBackground", this.mouseBackgroundColor)),
+                on(domNode, mouse.leave, lang.hitch(this, "_changeBackground", this.baseBackgroundColor))
+            );
         },
 
         _changeBackground: function(newColor) {
