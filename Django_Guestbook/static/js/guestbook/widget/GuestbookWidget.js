@@ -59,15 +59,16 @@ define([
             }).then(function(data){
                 var greetingContainer = this.greetingListNode;
                 var newDocFrag = document.createDocumentFragment();
-                var count = 0;
+                var arraywidget = [];
                 arrayUtil.forEach(data.greetings, function(greeting){
                     var widget = new GreetingWidget(greeting);
-                    widget.startup();
                     widget.placeAt(newDocFrag);
+                    arraywidget.push(widget);
                 });
-//                greetingContainer.appendChild(newDocFrag);
                 domConstruct.place(newDocFrag, greetingContainer);
-
+                arrayUtil.forEach(arraywidget, function(widget){
+                   widget.startup();
+                });
             });
         },
 
