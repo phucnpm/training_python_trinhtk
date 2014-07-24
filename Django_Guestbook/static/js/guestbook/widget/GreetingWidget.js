@@ -25,7 +25,6 @@ define([
             var domNode = this.domNode;
             this.inherited(arguments);
             domStyle.set(domNode, "backgroundColor", this.baseBackgroundColor);
-
             this.own(
                 on(domNode, mouse.enter, lang.hitch(this, "_changeBackground", this.mouseBackgroundColor)),
                 on(domNode, mouse.leave, lang.hitch(this, "_changeBackground", this.baseBackgroundColor))

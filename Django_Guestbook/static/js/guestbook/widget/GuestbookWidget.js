@@ -15,9 +15,10 @@ define([
     "dojo/ready",
     "dojo/cookie",
     "dojo/dom-attr",
+    "dojo/dom-construct",
     "dojo/text!./templates/GuestbookWidget.html"
 ], function(declare, baseFx, lang, mouse, on, _WidgetBase, arrayUtil, GreetingWidget, _TemplatedMixin,
-            dom, request, notify, parser, ready, cookie, domAtt, template){
+            dom, request, notify, parser, ready, cookie, domAtt, domConstruct, template){
     return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin], {
         guestbook : "default_guestbook",
         templateString: template,
@@ -27,8 +28,7 @@ define([
         mouseBackgroundColor: "#def",
 
         _signclick: function(evt){
-            var content = dom.byId("content");
-            text  = domAtt.get(content, "value");
+            text = this.contentNode.value;
             evt.stopPropagation();
             evt.preventDefault();
             request.post("/api/guestbook/"+this.guestbook+"/greeting/", {
@@ -40,38 +40,39 @@ define([
                 },
                 timeout : 1000
             });
-            content = dom.byId("content");
-            domAtt.set(content, "value", "");
+            this.contentNode.value = "";
             this._loadgreeting(this.guestbook, 500);
         },
 
         _switchclick: function(){
-            this.guestbook = domAtt.get(dom.byId("txtGuestbook_name"), "value");
+            this.guestbook = this.guestbookNode.value;
             this._loadgreeting(this.guestbook, 0);
         },
 
         _loadgreeting: function(guestbook, time){
             var start = new Date().getTime();
             while (new Date().getTime() < start + time);
-            dojo.empty(dom.byId("greetingListNode"));
+            this.greetingListNode.innerHTML = "";
+
             request("/api/guestbook/"+guestbook+"/greeting/", {
                 handleAs: "json"
             }).then(function(data){
-                var greetingContainer = dom.byId("greetingListNode");
+                var greetingContainer = this.greetingListNode;
                 var newDocFrag = document.createDocumentFragment();
                 var count = 0;
                 arrayUtil.forEach(data.greetings, function(greeting){
                     var widget = new GreetingWidget(greeting).placeAt(newDocFrag);
                 });
-                greetingContainer.appendChild(newDocFrag);
+//                greetingContainer.appendChild(newDocFrag);
+                domConstruct.place(newDocFrag, greetingContainer);
+
             });
         },
-        
+
         postCreate: function(){
             this.inherited(arguments);
-            var guestbook = dom.byId("txtGuestbook_name");
             this._loadgreeting(this.guestbook, 0);
-            domAtt.set(guestbook, "value", this.guestbook);
+            this.guestbookNode.value = this.guestbook;
             signButton = dom.byId("signButton");
             switchButton = dom.byId("switchButton");
             this.own(
