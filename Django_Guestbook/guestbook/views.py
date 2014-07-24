@@ -136,3 +136,23 @@ class Edit(FormView):
     def form_invalid(self, form):
         self.template_name = "guestbook/edit.html"
         return super(Edit, self).form_invalid(form)
+
+
+class ClientView(TemplateView):
+    template_name = "guestbook/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientView, self).get_context_data(**kwargs)
+        #Check whether user loged in
+        if users.get_current_user():
+            #Create link logout & text
+            url = users.create_logout_url(self.request.get_full_path())
+            url_linktext = 'Logout'
+            context['current_user'] = users.get_current_user().nickname()
+        else:
+            #Create link login & text
+            url = users.create_login_url(self.request.get_full_path())
+            url_linktext = 'Login'
+        context['url'] = url
+        context['url_linktext'] = url_linktext
+        return context
