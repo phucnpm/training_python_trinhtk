@@ -136,15 +136,3 @@ class Edit(FormView):
     def form_invalid(self, form):
         self.template_name = "guestbook/edit.html"
         return super(Edit, self).form_invalid(form)
-
-
-class UI(TemplateView):
-    template_name = "guestbook/index.html"
-
-    def get(self, request, *args, **kwargs):
-        guestbook_name = self.request.GET.get("guestbook_name")
-        if guestbook_name is None:
-            guestbook_name = "default_guestbook"
-        context = self.get_context_data(**kwargs)
-        context['guestbook_name'] = guestbook_name
-        return super(UI,self).render_to_response(context)

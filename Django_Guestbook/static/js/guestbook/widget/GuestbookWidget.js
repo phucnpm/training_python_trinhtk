@@ -24,11 +24,11 @@ define([
         mouseAnim: null,
         baseBackgroundColor: "#fff",
         mouseBackgroundColor: "#def",
-        _signclick: function(guestbook){
+        _signclick: function(){
             var content = dom.byId("content");
             text  = domAtt.get(content, "value");
-
-            request.post("/api/guestbook/"+guestbook+"/greeting/", {
+            
+            request.post("/api/guestbook/"+this.guestbook+"/greeting/", {
                 data:{
                     content: text
                 },
@@ -36,20 +36,15 @@ define([
                     "X-CSRFToken": cookie('csrftoken')
                 }
             });
-
-            location.reload();
+            this._loadgreeting(this.guestbook);
         },
         _switchclick: function(){
-            var guestbook = dom.byId("guestbook_name");
-            guestbook_name = domAtt.get(guestbook, "value");
-            window.location.replace(url);
+            this.guestbook = domAtt.get(dom.byId("txtGuestbook_name"), "value");
+            this._loadgreeting(this.guestbook);
         },
-        postCreate: function(){
-            this.inherited(arguments);
-//            alert(this.guestbook);
-            var guestbook = dom.byId("guestbook_name");
-            domAtt.set(guestbook, "value", this.guestbook);
-            request("/api/guestbook/"+this.guestbook+"/greeting/", {
+        _loadgreeting: function(guestbook){
+            dojo.empty(dom.byId("greetingListNode"));
+            request("/api/guestbook/"+guestbook+"/greeting/", {
                 handleAs: "json"
             }).then(function(data){
                 var greetingContainer = dom.byId("greetingListNode");
@@ -57,10 +52,17 @@ define([
                     var widget = new GreetingWidget(greeting).placeAt(greetingContainer);
                 });
             });
+        },
+        postCreate: function(){
+            this.inherited(arguments);
+            alert(this.guestbook);
+            var guestbook = dom.byId("txtGuestbook_name");
+            this._loadgreeting(this.guestbook);
+            domAtt.set(guestbook, "value", this.guestbook);
             signButton = dom.byId("signButton");
             switchButton = dom.byId("switchButton");
             this.own(
-                on(signButton,"click", lang.hitch(this, "_signclick", this.guestbook)),
+                on(signButton,"click", lang.hitch(this, "_signclick")),
                 on(switchButton,"click", lang.hitch(this, "_switchclick"))
             );
         }
