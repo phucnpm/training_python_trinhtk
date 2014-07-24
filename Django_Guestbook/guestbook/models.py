@@ -30,9 +30,9 @@ class Greeting(ndb.Model):
             dict["author"] = "An anonymous"
         dict['content'] = self.content
         dict['last_udated_by'] = self.updated_by
-        dict['pub_date'] = self.date.strftime("%Y-%m-%d %H:%M +0000")
+        dict['pub_date'] = self.date.strftime("%Y-%m-%d %H:%M +0700")
         if self.last_update:
-            dict['date_modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0000")
+            dict['date_modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0700")
         else:
             dict['date_modified'] = None
         return dict

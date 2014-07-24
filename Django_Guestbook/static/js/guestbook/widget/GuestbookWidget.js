@@ -24,18 +24,22 @@ define([
         mouseAnim: null,
         baseBackgroundColor: "#fff",
         mouseBackgroundColor: "#def",
-        _signclick: function(){
+        _signclick: function(evt){
             var content = dom.byId("content");
             text  = domAtt.get(content, "value");
-            
+            evt.stopPropagation();
+            evt.preventDefault();
             request.post("/api/guestbook/"+this.guestbook+"/greeting/", {
                 data:{
                     content: text
                 },
                 headers:{
                     "X-CSRFToken": cookie('csrftoken')
-                }
+                },
+                timeout : 1000
             });
+            content = dom.byId("content");
+            domAtt.set(content, "value", "");
             this._loadgreeting(this.guestbook);
         },
         _switchclick: function(){
@@ -43,19 +47,23 @@ define([
             this._loadgreeting(this.guestbook);
         },
         _loadgreeting: function(guestbook){
+//            var start = new Date().getTime();
+//            while (new Date().getTime() < start + 100);
             dojo.empty(dom.byId("greetingListNode"));
             request("/api/guestbook/"+guestbook+"/greeting/", {
                 handleAs: "json"
             }).then(function(data){
                 var greetingContainer = dom.byId("greetingListNode");
+                var newDocFrag = document.createDocumentFragment();
+                var count = 0;
                 arrayUtil.forEach(data.greetings, function(greeting){
-                    var widget = new GreetingWidget(greeting).placeAt(greetingContainer);
+                    var widget = new GreetingWidget(greeting).placeAt(newDocFrag);
                 });
+                greetingContainer.appendChild(newDocFrag);
             });
         },
         postCreate: function(){
             this.inherited(arguments);
-            alert(this.guestbook);
             var guestbook = dom.byId("txtGuestbook_name");
             this._loadgreeting(this.guestbook);
             domAtt.set(guestbook, "value", this.guestbook);
