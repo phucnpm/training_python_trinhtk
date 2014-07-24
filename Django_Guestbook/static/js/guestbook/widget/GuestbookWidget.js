@@ -61,7 +61,9 @@ define([
                 var newDocFrag = document.createDocumentFragment();
                 var count = 0;
                 arrayUtil.forEach(data.greetings, function(greeting){
-                    var widget = new GreetingWidget(greeting).placeAt(newDocFrag);
+                    var widget = new GreetingWidget(greeting);
+                    widget.startup();
+                    widget.placeAt(newDocFrag);
                 });
 //                greetingContainer.appendChild(newDocFrag);
                 domConstruct.place(newDocFrag, greetingContainer);
