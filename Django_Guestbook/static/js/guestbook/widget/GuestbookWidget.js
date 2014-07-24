@@ -10,13 +10,14 @@ define([
     "dijit/_TemplatedMixin",
     "dojo/dom",
     "dojo/request",
+    "dojo/request/notify",
     "dojo/parser",
     "dojo/ready",
     "dojo/cookie",
     "dojo/dom-attr",
     "dojo/text!./templates/GuestbookWidget.html"
 ], function(declare, baseFx, lang, mouse, on, _WidgetBase, arrayUtil, GreetingWidget, _TemplatedMixin,
-            dom, request, parser, ready, cookie, domAtt, template){
+            dom, request, notify, parser, ready, cookie, domAtt, template){
     return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin], {
         guestbook : "default_guestbook",
         templateString: template,
@@ -40,15 +41,15 @@ define([
             });
             content = dom.byId("content");
             domAtt.set(content, "value", "");
-            this._loadgreeting(this.guestbook);
+            this._loadgreeting(this.guestbook, 500);
         },
         _switchclick: function(){
             this.guestbook = domAtt.get(dom.byId("txtGuestbook_name"), "value");
-            this._loadgreeting(this.guestbook);
+            this._loadgreeting(this.guestbook, 0);
         },
-        _loadgreeting: function(guestbook){
-//            var start = new Date().getTime();
-//            while (new Date().getTime() < start + 100);
+        _loadgreeting: function(guestbook, time){
+            var start = new Date().getTime();
+            while (new Date().getTime() < start + time);
             dojo.empty(dom.byId("greetingListNode"));
             request("/api/guestbook/"+guestbook+"/greeting/", {
                 handleAs: "json"
@@ -65,7 +66,7 @@ define([
         postCreate: function(){
             this.inherited(arguments);
             var guestbook = dom.byId("txtGuestbook_name");
-            this._loadgreeting(this.guestbook);
+            this._loadgreeting(this.guestbook, 0);
             domAtt.set(guestbook, "value", this.guestbook);
             signButton = dom.byId("signButton");
             switchButton = dom.byId("switchButton");
