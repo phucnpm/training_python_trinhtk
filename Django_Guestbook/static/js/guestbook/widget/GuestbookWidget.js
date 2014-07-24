@@ -25,6 +25,7 @@ define([
         mouseAnim: null,
         baseBackgroundColor: "#fff",
         mouseBackgroundColor: "#def",
+
         _signclick: function(evt){
             var content = dom.byId("content");
             text  = domAtt.get(content, "value");
@@ -43,10 +44,12 @@ define([
             domAtt.set(content, "value", "");
             this._loadgreeting(this.guestbook, 500);
         },
+
         _switchclick: function(){
             this.guestbook = domAtt.get(dom.byId("txtGuestbook_name"), "value");
             this._loadgreeting(this.guestbook, 0);
         },
+
         _loadgreeting: function(guestbook, time){
             var start = new Date().getTime();
             while (new Date().getTime() < start + time);
@@ -63,6 +66,7 @@ define([
                 greetingContainer.appendChild(newDocFrag);
             });
         },
+        
         postCreate: function(){
             this.inherited(arguments);
             var guestbook = dom.byId("txtGuestbook_name");
