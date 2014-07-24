@@ -73,11 +73,9 @@ define([
             this.inherited(arguments);
             this._loadgreeting(this.guestbook, 0);
             this.guestbookNode.value = this.guestbook;
-            signButton = dom.byId("signButton");
-            switchButton = dom.byId("switchButton");
             this.own(
-                on(signButton,"click", lang.hitch(this, "_signclick")),
-                on(switchButton,"click", lang.hitch(this, "_switchclick"))
+                on(this.signButtonNode,"click", lang.hitch(this, "_signclick")),
+                on(this.switchButtonNode,"click", lang.hitch(this, "_switchclick"))
             );
         }
     });
