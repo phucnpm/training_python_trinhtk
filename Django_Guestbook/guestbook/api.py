@@ -119,8 +119,11 @@ class SearchID(JSONResponseMixin, FormView):
     # object, note that browsers only support POST for now.
 
     def put(self, request, *args, **kwargs):
-        #convert 
+        #<bound method QueryDict.get of <QueryDict: {}>
+        request.POST.get
+        #Assign request.POST = QueryDict(request.body)
         request.POST = QueryDict(request.body)
+        # This moment : request.POST = <QueryDict: {u'content': u'<value'}
         return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):
