@@ -65,6 +65,7 @@ define([
                 var arraywidget = [];
                 arrayUtil.forEach(data.greetings, function(greeting){
                     greeting.is_admin = data.is_admin;
+                    greeting.guestbook_name = data.guestbook_name
                     var widget = new GreetingWidget(greeting);
                     widget.placeAt(newDocFrag);
                     arraywidget.push(widget);
