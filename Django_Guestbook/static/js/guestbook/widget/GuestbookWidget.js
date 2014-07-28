@@ -26,9 +26,10 @@ define([
         guestbook : "default_guestbook",
         templateString: template,
         baseClass: "GuestbookWidget",
-        mouseAnim: null,
-        baseBackgroundColor: "#fff",
-        mouseBackgroundColor: "#def",
+
+        constructor : function(name){
+            this.guestbook = name;
+        },
 
         _signclick: function(evt){
             text = this.contentNode.value;
@@ -43,7 +44,6 @@ define([
                 },
                 timeout : 1000
             });
-            this.contentNode.value = "";
             this._loadgreeting(this.guestbook, 500);
         },
 

@@ -7,14 +7,16 @@ define([
     "dojo/dom-style",
     "dojo/mouse",
     "dojo/on",
+    "guestbook/widget/GuestbookWidget",
     "dijit/_WidgetBase",
+    "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dijit/form/Button",
     "dojo/text!./templates/GreetingWidget.html"
-], function(request, cookie, declare, baseFx, lang, domStyle, mouse, on, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
+], function(request, cookie, declare, baseFx, lang, domStyle, mouse, on,GuestbookWidget, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, _WidgetsInTemplateMixin,
             Button, template){
-    return declare([_WidgetBase, _TemplatedMixin], {
+    return declare([_WidgetBase,_OnDijitClickMixin, _TemplatedMixin, _WidgetsInTemplateMixin], {
         author: "No name",
         content: "",
         pub_date: "",
@@ -67,8 +69,7 @@ define([
                 },
                 timeout : 1000
             });
-            location.reload();
-
+            dijit.byId("guestbook")._loadgreeting(guestbook, 500);
         }
 
     });

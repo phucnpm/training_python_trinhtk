@@ -17,7 +17,7 @@
 <body>
 
 {% csrf_token %}
-<span data-dojo-type="app.FirstWidget"data-dojo-props="guestbook:'default_guestbook'"></span>
+<span id="guestbook" data-dojo-type="app.FirstWidget"data-dojo-props="guestbook:'default_guestbook'"></span>
 <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"></script>
 <script type="text/javascript">
     require([
