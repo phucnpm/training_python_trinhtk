@@ -23,11 +23,11 @@ define([
             GuestbookWidget, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin,_WidgetsInTemplateMixin,
             Button, ValidationTextBox, InlineEditBox, Textarea, template){
     return declare([_WidgetBase,_OnDijitClickMixin, _TemplatedMixin, _WidgetsInTemplateMixin], {
-        author: "No name",
+        author: "An anonymous",
         content: "",
         pub_date: "",
-        last_udated: "",
-        date_modified: "",
+        updated_by: "<Not updated>",
+        date_modified: "<Not updated>",
         templateString: template,
         baseClass: "GreetingWidget",
         mouseAnim: null,
@@ -35,12 +35,17 @@ define([
         mouseBackgroundColor: "#def",
         is_admin : false,
         guestbook_name : "",
+        is_author : false,
         id_greeting : "",
 
         postCreate: function(){
             this.deleteButtonNode.disabled = true;
+            this.contentNode.disabled = true;
             if (this.is_admin)
                 this.deleteButtonNode.disabled = false;
+                this.contentNode.disabled = false;
+            if (this.is_author)
+                this.contentNode.disabled = false;
             var domNode = this.domNode;
             this.inherited(arguments);
             domStyle.set(domNode, "backgroundColor", this.baseBackgroundColor);
@@ -92,7 +97,7 @@ define([
                 },
                 timeout : 1000
             });
-//            dijit.byId("guestbook")._loadgreeting(guestbook, 500);
+            dijit.byId("guestbook")._loadgreeting(guestbook, 500);
         }
 
     });

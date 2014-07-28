@@ -26,14 +26,16 @@ class Greeting(ndb.Model):
         dict = {}
         if self.author:
             dict["author"] = self.author
+            if users.get_current_user():
+                if users.get_current_user().nickname() == self.author:
+                    dict["is_author"] = True
         dict['id_greeting'] = self.key.id()
         dict['content'] = self.content
-        dict['last_udated_by'] = self.updated_by
+        if self.updated_by:
+            dict['updated_by'] = self.updated_by
         dict['pub_date'] = self.date.strftime("%Y-%m-%d %H:%M +0700")
         if self.last_update:
             dict['date_modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0700")
-        else:
-            dict['date_modified'] = None
         return dict
 
     @classmethod
