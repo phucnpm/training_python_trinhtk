@@ -60,15 +60,15 @@ define([
         },
 
         _delete: function(guestbook, id){
-            alert(guestbook);
-            alert(id);
+
             request.del("/api/guestbook/"+guestbook+"/greeting/"+id+"/", {
                 headers:{
                     "X-CSRFToken": cookie('csrftoken')
                 },
                 timeout : 1000
             });
-            alert("deleted");
+            location.reload();
+
         }
 
     });
