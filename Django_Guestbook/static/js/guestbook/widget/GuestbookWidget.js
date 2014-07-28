@@ -64,6 +64,7 @@ define([
                 var newDocFrag = document.createDocumentFragment();
                 var arraywidget = [];
                 arrayUtil.forEach(data.greetings, function(greeting){
+                    console.log(greeting);
                     greeting.is_admin = data.is_admin;
                     greeting.guestbook_name = data.guestbook_name;
                     var widget = new GreetingWidget(greeting);

@@ -1,6 +1,11 @@
-<div>
+<span>
     <b><span data-dojo-attach-point="authorNode">${author} </span></b> wrote at <span data-dojo-attach-point="pub_date">${!pub_date}</span>:
-    <p data-dojo-attach-point="content">${!content}</p>
-    <p>${id_greeting}</p>
-    <button data-dojo-type="dijit/form/Button" data-dojo-attach-point="deleteButtonNode" id="deleteButton" value="Delete">Delete</button>
-</div>
+    <div data-dojo-type="dijit/InlineEditBox"
+         data-dojo-props="
+         editor:'dijit/form/Textarea',
+         autoSave: false,
+         "
+         data-dojo-attach-point="contentNode">${!content}</div>
+    <button data-dojo-type="dijit/form/Button" data-dojo-attach-point="deleteButtonNode" value="Delete">Delete</button>
+    <br/>
+</span>

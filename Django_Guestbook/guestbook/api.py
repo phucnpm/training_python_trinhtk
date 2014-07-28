@@ -1,6 +1,6 @@
 from django.utils import simplejson as json
 import logging
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.edit import FormView
 from google.appengine.api import datastore_errors
@@ -115,10 +115,17 @@ class SearchID(JSONResponseMixin, FormView):
         #     Fail return Http 404
         #     Form invalid return Http 400
         #
+    # PUT is a valid HTTP verb for creating (with a known URL) or editing an
+    # object, note that browsers only support POST for now.
+
+    def put(self, request, *args, **kwargs):
+        #convert 
+        request.POST = QueryDict(request.body)
+        return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        guestbook_name = self.kwargs('guestbook_name')
-        id = self.kwargs('id')
+        guestbook_name = self.kwargs['guestbook_name']
+        id = self.kwargs['id']
         content = self.request.POST.get('content')
         myguestbook = Guestbook(name=guestbook_name)
         greeting = myguestbook.get_greeting_by_id(id)
@@ -130,7 +137,6 @@ class SearchID(JSONResponseMixin, FormView):
             return HttpResponse(status=404)
 
     def form_invalid(self, form):
-
         return HttpResponse(status=400)
 
     # DELETE /api/guestbook/<guestbook_name>/greeting/<id>
