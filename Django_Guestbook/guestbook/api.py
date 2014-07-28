@@ -44,6 +44,7 @@ class Search(JSONResponseMixin, FormView):
         items, nextcurs, more = Greeting.get_page(guestbook_name, 10, curs)
         dict_item = [x.greeting_to_dict() for x in items]
         context = {}
+        context["is_admin"] = users.is_current_user_admin()
         context["guestbook_name"] = guestbook_name
         context["greetings"] = dict_item
         context["more"] = more

@@ -7,8 +7,11 @@ define([
     "dojo/on",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
+    "dijit/_WidgetsInTemplateMixin",
+    "dijit/form/Button",
     "dojo/text!./templates/GreetingWidget.html"
-], function(declare, baseFx, lang, domStyle, mouse, on, _WidgetBase, _TemplatedMixin, template){
+], function(declare, baseFx, lang, domStyle, mouse, on, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
+            Button, template){
     return declare([_WidgetBase, _TemplatedMixin], {
         author: "No name",
         content: "",
@@ -20,8 +23,13 @@ define([
         mouseAnim: null,
         baseBackgroundColor: "#fff",
         mouseBackgroundColor: "#def",
+        is_admin : false,
 
         postCreate: function(){
+            this.deleteButtonNode.disabled = true;
+            if (this.is_admin){
+                this.deleteButtonNode.disabled = false;
+            }
             var domNode = this.domNode;
             this.inherited(arguments);
             domStyle.set(domNode, "backgroundColor", this.baseBackgroundColor);
@@ -45,5 +53,7 @@ define([
                 })
             }).play();
         }
+
+
     });
 });

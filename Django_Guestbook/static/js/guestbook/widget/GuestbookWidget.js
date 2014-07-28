@@ -16,10 +16,13 @@ define([
     "dojo/cookie",
     "dojo/dom-attr",
     "dojo/dom-construct",
+    "dijit/_WidgetsInTemplateMixin",
+    "dijit/form/Button",
+    "dijit/form/ValidationTextBox",
     "dojo/text!./templates/GuestbookWidget.html"
 ], function(declare, baseFx, lang, mouse, on, _WidgetBase, arrayUtil, GreetingWidget, _TemplatedMixin,
-            dom, request, notify, parser, ready, cookie, domAtt, domConstruct, template){
-    return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin], {
+            dom, request, notify, parser, ready, cookie, domAtt, domConstruct, _WidgetsInTemplateMixin, button, validationtextbox, template){
+    return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         guestbook : "default_guestbook",
         templateString: template,
         baseClass: "GuestbookWidget",
@@ -61,6 +64,7 @@ define([
                 var newDocFrag = document.createDocumentFragment();
                 var arraywidget = [];
                 arrayUtil.forEach(data.greetings, function(greeting){
+                    greeting.is_admin = data.is_admin;
                     var widget = new GreetingWidget(greeting);
                     widget.placeAt(newDocFrag);
                     arraywidget.push(widget);

@@ -26,8 +26,6 @@ class Greeting(ndb.Model):
         dict = {}
         if self.author:
             dict["author"] = self.author
-        else:
-            dict["author"] = "An anonymous"
         dict['content'] = self.content
         dict['last_udated_by'] = self.updated_by
         dict['pub_date'] = self.date.strftime("%Y-%m-%d %H:%M +0700")
