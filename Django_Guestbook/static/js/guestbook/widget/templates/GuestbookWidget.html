@@ -1,19 +1,16 @@
 <div>
     <b id="announce"></b>
-    <div data-dojo-attach-point="greetingListNode" id="greetingListNode"></div>
+    <div data-dojo-attach-point="greetingListNode" id="greetingListNode" class="GreetingWidget"></div>
     <b>Content:</b><br />
-    <input
-        data-dojo-type="dijit.form.ValidationTextBox"
-        data-dojo-props="
+    <input class="valid" data-dojo-type="dijit.form.ValidationTextBox"
+           data-dojo-props="
             regExp: '.{10}',
             required: true,
             invalidMessage: 'Max length = 10!',
             placeholder: 'Type in content',
-            tooltipPosition: ['below'],
-        "
-        data-dojo-attach-point="contentNode"
-        id="content"
-    />
+            tooltipPosition: ['below']"
+           data-dojo-attach-point="contentNode"
+           id="content"/>
     <br />
     <button data-dojo-type="dijit/form/Button" data-dojo-attach-point="signButtonNode" id="signButton" value="Sign Guestbook">Sign Guestbook</button>
     <br/>

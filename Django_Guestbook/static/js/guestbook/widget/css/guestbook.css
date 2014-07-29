@@ -1,0 +1,41 @@
+/* myApp/widget/css/AuthorWidget.css */
+
+.GreetingWidget{
+     font-size: 1em;
+    font-style: italic;
+    margin: 0px;
+    border: 1px solid black;
+    width: 400px;
+    overflow: hidden;
+}
+.GreetingWidget b {
+    font-size: 1.5em;
+    font-style: italic;
+    text-align: center;
+    margin: 0px;
+}
+.content {
+    font-size: 1.5em;
+    font-family: Comic Sans MS;
+}
+.date{
+    font-size: 0.8em;
+    font-style: italic;
+    text-align: center;
+    margin: 0px;
+}
+
+.GuestbookWidget{
+    font-size: 1em;
+    font-style: italic;
+    margin: 0px;
+    border: 1px solid black;
+    width: 400px;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.valid{
+    height: 200px;
+    width : 400px;
+}
