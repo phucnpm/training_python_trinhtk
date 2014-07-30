@@ -1,8 +1,6 @@
 define([
     "dojo/_base/declare",
-    "dojo/_base/fx",
     "dojo/_base/lang",
-    "dojo/mouse",
     "dojo/on",
     "dijit/_WidgetBase",
     "dojo/_base/array",
@@ -10,19 +8,14 @@ define([
     "../models/GreetingStore",
     "dijit/_TemplatedMixin",
     "dojo/dom",
-    "dojo/request",
-    "dojo/request/notify",
-    "dojo/parser",
-    "dojo/ready",
     "dojo/cookie",
-    "dojo/dom-attr",
     "dojo/dom-construct",
     "dijit/_WidgetsInTemplateMixin",
     "dijit/form/Button",
     "dijit/form/ValidationTextBox",
     "dojo/text!./templates/GuestbookWidget.html"
-], function(declare, baseFx, lang, mouse, on, _WidgetBase, arrayUtil, GreetingWidget, GreetingStore, _TemplatedMixin,
-            dom, request, notify, parser, ready, cookie, domAtt, domConstruct, _WidgetsInTemplateMixin, button, validationtextbox, template){
+], function(declare, lang, on, _WidgetBase, arrayUtil, GreetingWidget, GreetingStore, _TemplatedMixin,
+            dom, cookie, domConstruct, _WidgetsInTemplateMixin, button, validationtextbox, template){
     return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         guestbook : "default_guestbook",
         templateString: template,

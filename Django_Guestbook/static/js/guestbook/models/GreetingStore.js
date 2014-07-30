@@ -1,12 +1,10 @@
 define([
-    'dojo/request',
     'dojo/cookie',
     'dojo/dom',
-    'dojo/_base/array',
     'dojo/_base/declare',
     'dojo/store/JsonRest',
     'dojo/Stateful'
-], function(request, cookie, dom, array, declare, JsonRest, Stateful) {
+], function(cookie, dom, declare, JsonRest, Stateful) {
     return declare([Stateful], {
         guestBookName: '',
         store: null,

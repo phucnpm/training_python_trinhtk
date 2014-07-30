@@ -64,7 +64,9 @@ class Search(JSONResponseMixin, FormView):
     def post(self, request, *args, **kwargs):
         #<bound method QueryDict.get of <QueryDict: {}>
         logging.warning(request.body)
-        request.POST = json.loads(request.body)
+        #If request.POST is null -> request.Post = request.body to dict
+        if not request.POST:
+            request.POST = json.loads(request.body)
         content = request.POST.get('content')
         return super(Search, self).post(request, args, kwargs)
 
@@ -125,7 +127,9 @@ class SearchID(JSONResponseMixin, FormView):
     # object, note that browsers only support POST for now.
 
     def put(self, request, *args, **kwargs):
-        request.POST = json.loads(request.body)
+        #If request.POST is null -> request.Post = request.body to dict
+        if not request.POST:
+            request.POST = json.loads(request.body)
         return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):

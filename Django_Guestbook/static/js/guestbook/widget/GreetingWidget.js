@@ -1,10 +1,6 @@
 define([
-    "dojo/request",
-    "dojo/parser",
-    "dojo/ready",
     "dojo/cookie",
     "dojo/_base/declare",
-    "dojo/_base/fx",
     "dojo/_base/lang",
     "dojo/dom-style",
     "dojo/mouse",
@@ -12,19 +8,16 @@ define([
     "./GuestbookWidget",
     "../models/GreetingStore",
     "dijit/_WidgetBase",
-    "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dijit/form/Button",
     "dijit/form/ValidationTextBox",
     "dijit/InlineEditBox",
-    "dijit/form/Textarea",
-    "dojo/fx/Toggler",
     "dojo/text!./templates/GreetingWidget.html"
-], function(request, parser, ready, cookie, declare, baseFx, lang, domStyle, mouse, on,
-            GreetingStore, GuestbookWidget, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin,_WidgetsInTemplateMixin,
-            Button, ValidationTextBox, InlineEditBox, Textarea, Toggler, template){
-    return declare([_WidgetBase,_OnDijitClickMixin, _TemplatedMixin, _WidgetsInTemplateMixin], {
+], function(cookie, declare, lang, domStyle, mouse, on,
+            GreetingStore, GuestbookWidget, _WidgetBase, _TemplatedMixin,_WidgetsInTemplateMixin,
+            Button, ValidationTextBox, InlineEditBox, template){
+    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         author: "An anonymous",
         content: "",
         pub_date: "",
