@@ -1,9 +1,9 @@
 
 <div>
     <b>Update status:</b><br />
-    <input class="valid" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="regExp: '.{10}', required: true, invalidMessage: 'Max length = 10!', placeholder: 'What\'s on your mind?', tooltipPosition: ['below']" data-dojo-attach-point="contentNode" id="content"/>
+    <input  data-dojo-attach-point="contentNode" id="content" class="valid" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="regExp: '.{10}', required: true, invalidMessage: 'Max length = 10!', placeholder: 'What\'s on your mind?', tooltipPosition: ['below']"/>
     <br />
-    <button data-dojo-type="dijit/form/Button" data-dojo-attach-point="signButtonNode" id="signButton" value="Post" style="float: right"> Post Status </button>
+    <button data-dojo-attach-point="signButtonNode" id="signButton" data-dojo-type="dijit/form/Button" value="Post" style="float: right"> Post Status </button>
     <br/>
     <b>Guestbook:</b>
     <input data-dojo-attach-point="guestbookNode" value="" id="txtGuestbook_name" name="guestbook_name">
