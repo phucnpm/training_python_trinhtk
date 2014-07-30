@@ -2,21 +2,19 @@ define([
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/on",
-    "dijit/_WidgetBase",
     "dojo/_base/array",
     "./GreetingWidget",
     "../models/GreetingStore",
-    "dijit/_TemplatedMixin",
     "dojo/dom",
     "dojo/cookie",
     "dojo/dom-construct",
-    "dijit/_WidgetsInTemplateMixin",
     "dijit/form/Button",
     "dijit/form/ValidationTextBox",
+    './_ViewBaseMixin',
     "dojo/text!./templates/GuestbookWidget.html"
-], function(declare, lang, on, _WidgetBase, arrayUtil, GreetingWidget, GreetingStore, _TemplatedMixin,
-            dom, cookie, domConstruct, _WidgetsInTemplateMixin, button, validationtextbox, template){
-    return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+], function(declare, lang, on, arrayUtil, GreetingWidget, GreetingStore,
+            dom, cookie, domConstruct, button, validationtextbox,_ViewBaseMixin, template){
+    return declare("app.FirstWidget",[_ViewBaseMixin], {
         guestbook : "default_guestbook",
         templateString: template,
         baseClass: "GuestbookWidget",

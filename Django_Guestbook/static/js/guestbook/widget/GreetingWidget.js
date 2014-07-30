@@ -1,5 +1,6 @@
 define([
     "dojo/cookie",
+    "dojo/_base/fx",
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/dom-style",
@@ -7,17 +8,15 @@ define([
     "dojo/on",
     "./GuestbookWidget",
     "../models/GreetingStore",
-    "dijit/_WidgetBase",
-    "dijit/_TemplatedMixin",
-    "dijit/_WidgetsInTemplateMixin",
+    "./_ViewBaseMixin",
     "dijit/form/Button",
     "dijit/form/ValidationTextBox",
     "dijit/InlineEditBox",
     "dojo/text!./templates/GreetingWidget.html"
-], function(cookie, declare, lang, domStyle, mouse, on,
-            GreetingStore, GuestbookWidget, _WidgetBase, _TemplatedMixin,_WidgetsInTemplateMixin,
+], function(cookie, baseFx, declare, lang, domStyle, mouse, on,
+            GreetingStore, GuestbookWidget, _ViewBaseMixin,
             Button, ValidationTextBox, InlineEditBox, template){
-    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+    return declare([_ViewBaseMixin], {
         author: "An anonymous",
         content: "",
         pub_date: "",
@@ -33,12 +32,15 @@ define([
         is_author : false,
         id_greeting : "",
         disabled: "",
-        hidden : "none",
         avatar: require.toUrl("guestbook/widget/images/defaultAvatar.jpg"),
 
         postCreate: function(){
-            var domNode = this.domNode;
+
+            if(this.is_admin){
+                domStyle.set(this.deleteButtonNode.domNode, 'visibility', 'visible');
+            }
             this.inherited(arguments);
+            var domNode = this.domNode;
             domStyle.set(domNode, "backgroundColor", this.baseBackgroundColor);
             this.own(
                 on(this.contentNode, "change", lang.hitch(this, "_put", this.guestbook_name, this.id_greeting)),
@@ -49,11 +51,7 @@ define([
         },
 
         buildRendering: function(){
-            if(this.is_admin){
-                this.hidden = "display: true";
-            }
-            else
-                this.hidden = "display: none";
+
             if(this.is_admin || this.is_author){
                 this.disabled = "disabled: false,"
             }
