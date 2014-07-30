@@ -9,7 +9,8 @@ define([
     "dojo/dom-style",
     "dojo/mouse",
     "dojo/on",
-    "guestbook/widget/GuestbookWidget",
+    "./GuestbookWidget",
+    "../models/GreetingStore",
     "dijit/_WidgetBase",
     "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
@@ -21,7 +22,7 @@ define([
     "dojo/fx/Toggler",
     "dojo/text!./templates/GreetingWidget.html"
 ], function(request, parser, ready, cookie, declare, baseFx, lang, domStyle, mouse, on,
-            GuestbookWidget, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin,_WidgetsInTemplateMixin,
+            GreetingStore, GuestbookWidget, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin,_WidgetsInTemplateMixin,
             Button, ValidationTextBox, InlineEditBox, Textarea, Toggler, template){
     return declare([_WidgetBase,_OnDijitClickMixin, _TemplatedMixin, _WidgetsInTemplateMixin], {
         author: "An anonymous",
@@ -41,6 +42,7 @@ define([
         disabled: "",
         hidden : "none",
         avatar: require.toUrl("guestbook/widget/images/defaultAvatar.jpg"),
+
         postCreate: function(){
             var domNode = this.domNode;
             this.inherited(arguments);
@@ -67,6 +69,10 @@ define([
             this.inherited(arguments);
         },
 
+        _guestbook: function(){
+            return dijit.byId("guestbook");
+        },
+
         startup: function(){
             this.inherited(arguments);
         },
@@ -90,13 +96,8 @@ define([
                 alert("You are not administrator!!!");
             }
             else{
-                request.del("/api/guestbook/"+guestbook+"/greeting/"+id+"/", {
-                    headers:{
-                        "X-CSRFToken": cookie('csrftoken')
-                    },
-                    timeout : 1000
-                });
-                dijit.byId("guestbook")._loadgreeting(guestbook, 500);
+                this._guestbook()._deletegreeting(id);
+                this._guestbook()._loadgreeting(guestbook, 500);
             }
 
 
@@ -105,16 +106,8 @@ define([
         _put: function(guestbook, id){
             //this.contentNode.value
             if(this.is_admin || this.is_author){
-                request.put("/api/guestbook/"+guestbook+"/greeting/"+id+"/", {
-                    data:{
-                        content: this.contentNode.value
-                    },
-                    headers:{
-                        "X-CSRFToken": cookie('csrftoken')
-                    },
-                    timeout : 1000
-                });
-                dijit.byId("guestbook")._loadgreeting(guestbook, 500);
+                this._guestbook()._updategreeting(id, this.contentNode.value);
+                this._guestbook()._loadgreeting(guestbook, 500);
 
             }
             else{

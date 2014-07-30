@@ -11,7 +11,7 @@ except ImportError:
     from google.appengine.api import taskqueue
 from guestbook.forms import ApiForm
 from guestbook.models import Guestbook, Greeting
-
+import json
 
 class JSONResponseMixin(object):
 
@@ -61,12 +61,18 @@ class Search(JSONResponseMixin, FormView):
 
     form_class = ApiForm
 
+    def post(self, request, *args, **kwargs):
+        #<bound method QueryDict.get of <QueryDict: {}>
+        logging.warning(request.body)
+        request.POST = json.loads(request.body)
+        content = request.POST.get('content')
+        return super(Search, self).post(request, args, kwargs)
+
     def form_invalid(self, form):
         return HttpResponse(status=400)
 
     def form_valid(self, form):
         guestbook_name = self.kwargs['guestbook_name']
-        #guestbook_name = "default_guestbook"
         myguestbook = Guestbook(name=guestbook_name)
         content = self.request.POST.get('content')
         if users.get_current_user():
@@ -119,14 +125,11 @@ class SearchID(JSONResponseMixin, FormView):
     # object, note that browsers only support POST for now.
 
     def put(self, request, *args, **kwargs):
-        #<bound method QueryDict.get of <QueryDict: {}>
-        request.POST.get
-        #Assign request.POST = QueryDict(request.body)
-        request.POST = QueryDict(request.body)
-        # This moment : request.POST = <QueryDict: {u'content': u'<value'}
+        request.POST = json.loads(request.body)
         return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):
+        self.request.POST = json.loads(self.request.body)
         guestbook_name = self.kwargs['guestbook_name']
         id = self.kwargs['id']
         content = self.request.POST.get('content')

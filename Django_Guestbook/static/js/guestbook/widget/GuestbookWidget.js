@@ -6,7 +6,8 @@ define([
     "dojo/on",
     "dijit/_WidgetBase",
     "dojo/_base/array",
-    "guestbook/widget/GreetingWidget",
+    "./GreetingWidget",
+    "../models/GreetingStore",
     "dijit/_TemplatedMixin",
     "dojo/dom",
     "dojo/request",
@@ -20,15 +21,17 @@ define([
     "dijit/form/Button",
     "dijit/form/ValidationTextBox",
     "dojo/text!./templates/GuestbookWidget.html"
-], function(declare, baseFx, lang, mouse, on, _WidgetBase, arrayUtil, GreetingWidget, _TemplatedMixin,
+], function(declare, baseFx, lang, mouse, on, _WidgetBase, arrayUtil, GreetingWidget, GreetingStore, _TemplatedMixin,
             dom, request, notify, parser, ready, cookie, domAtt, domConstruct, _WidgetsInTemplateMixin, button, validationtextbox, template){
     return declare("app.FirstWidget",[_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         guestbook : "default_guestbook",
         templateString: template,
         baseClass: "GuestbookWidget",
+        store : null,
 
         constructor : function(name){
-            this.guestbook = name;
+            this.inherited(arguments);
+            this.store = new GreetingStore();
         },
 
         _signclick: function(evt){
@@ -41,17 +44,7 @@ define([
                     alert("This field is required!");
                 }
                 else{
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                    request.post("/api/guestbook/"+this.guestbook+"/greeting/", {
-                        data:{
-                            content: text
-                        },
-                        headers:{
-                            "X-CSRFToken": cookie('csrftoken')
-                        },
-                        timeout : 1000
-                    });
+                    this._addgreeting();
                     this._loadgreeting(this.guestbook, 500);
                 }
             }
@@ -68,25 +61,36 @@ define([
             while (new Date().getTime() < start + time);
             this.greetingListNode.innerHTML = "";
 
-            request("/api/guestbook/"+guestbook+"/greeting/", {
-                handleAs: "json"
-            }).then(function(data){
-                var greetingContainer = this.greetingListNode;
-                var newDocFrag = document.createDocumentFragment();
-                var arraywidget = [];
-                arrayUtil.forEach(data.greetings, function(greeting){
-                    console.log(greeting);
-                    greeting.is_admin = data.is_admin;
-                    greeting.guestbook_name = data.guestbook_name;
-                    var widget = new GreetingWidget(greeting);
-                    widget.placeAt(newDocFrag);
-                    arraywidget.push(widget);
-                });
-                domConstruct.place(newDocFrag, greetingContainer);
-                arrayUtil.forEach(arraywidget, function(widget){
-                   widget.startup();
+            this.store.getGreetings(this.guestbook).then(
+                function(data){
+                    var greetingContainer = this.greetingListNode;
+                    var newDocFrag = document.createDocumentFragment();
+                    var arraywidget = [];
+                    arrayUtil.forEach(data.greetings, function(greeting){
+                        console.log(greeting);
+                        greeting.is_admin = data.is_admin;
+                        greeting.guestbook_name = data.guestbook_name;
+                        var widget = new GreetingWidget(greeting);
+                        widget.placeAt(newDocFrag);
+                        arraywidget.push(widget);
+                    });
+                    domConstruct.place(newDocFrag, greetingContainer);
+                    arrayUtil.forEach(arraywidget, function(widget){
+                       widget.startup();
                 });
             });
+        },
+
+        _addgreeting: function(){
+            this.store.addGreeting(this.contentNode.value, this.guestbook);
+        },
+
+        _deletegreeting: function(greetingId){
+            this.store.deleteGreeting(greetingId, this.guestbook)
+        },
+
+        _updategreeting: function(greetingId, greetingContent){
+            this.store.updateGreeting(greetingId, greetingContent, this.guestbook)
         },
 
         postCreate: function(){

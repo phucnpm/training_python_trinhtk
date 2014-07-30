@@ -12,6 +12,6 @@ urlpatterns = patterns('',
     url(r'^edit/$', Edit.as_view(), name ='edit'),
     url(r'^api/guestbook/(?P<guestbook_name>[a-zA-Z0-9\s\+\_]+)/greeting/$',Search.as_view()),
     url(r'^api/guestbook/(?P<guestbook_name>[a-zA-Z0-9\s\+\_]+)/'
-        r'greeting/(?P<id>[a-zA-Z0-9\s\+\_]+)/$',SearchID.as_view()),
+        r'greeting/(?P<id>[a-zA-Z0-9\s\+\_]+)$',SearchID.as_view()),
     url(r'^client/$',ClientView.as_view(), name='ui')
 )
