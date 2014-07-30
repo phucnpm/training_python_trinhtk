@@ -24,14 +24,18 @@ class Greeting(ndb.Model):
     def greeting_to_dict(self):
 
         dict = {}
-        dict["author"] = self.author
+        if self.author:
+            dict["author"] = self.author
+            if users.get_current_user():
+                if users.get_current_user().nickname() == self.author:
+                    dict["is_author"] = True
+        dict['id_greeting'] = self.key.id()
         dict['content'] = self.content
-        dict['last udated by'] = self.updated_by
-        dict['pub date'] = self.date.strftime("%Y-%m-%d %H:%M +0000")
+        if self.updated_by:
+            dict['updated_by'] = self.updated_by
+        dict['pub_date'] = self.date.strftime("%Y-%m-%d %H:%M +0700")
         if self.last_update:
-            dict['date modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0000")
-        else:
-            dict['date modified'] = None
+            dict['date_modified'] = self.last_update.strftime("%Y-%m-%d %H:%M +0700")
         return dict
 
     @classmethod
@@ -42,7 +46,7 @@ class Greeting(ndb.Model):
             more = None
         try:
             items, nextcurs, more = Greeting.query(
-                ancestor=ndb.Key(Guestbook, guestbook_name))\
+                ancestor=ndb.Key(Guestbook, guestbook_name)) \
                 .order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
         except:
             items = None
@@ -88,7 +92,8 @@ class Guestbook(ndb.Model):
                                       'author': None,
                                       'content': content})
             memcache.delete("%s:greetings" % self.name)
-
+            return True
+        return False
     @ndb.transactional
     def delete_greeting(self, id):
 

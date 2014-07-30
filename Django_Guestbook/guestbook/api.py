@@ -1,6 +1,6 @@
 from django.utils import simplejson as json
 import logging
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.edit import FormView
 from google.appengine.api import datastore_errors
@@ -11,7 +11,7 @@ except ImportError:
     from google.appengine.api import taskqueue
 from guestbook.forms import ApiForm
 from guestbook.models import Guestbook, Greeting
-
+import json
 
 class JSONResponseMixin(object):
 
@@ -28,12 +28,12 @@ class JSONResponseMixin(object):
 
 
 class Search(JSONResponseMixin, FormView):
-#       GET /api/guestbook/<guestbook_name>/greeting
-#
-#  return JSON: guestbookname as STRING, more as BOOL, next_cursor as STRING, 20 lastest greetings
-#       GET /api/guestbook/<guestbook_name>/greeting?cursor=<urlsafe_next_cursor>
-#         return 20 next greetings
-#       return Http 404 if query error
+    #       GET /api/guestbook/<guestbook_name>/greeting
+    #
+    #  return JSON: guestbookname as STRING, more as BOOL, next_cursor as STRING, 20 lastest greetings
+    #       GET /api/guestbook/<guestbook_name>/greeting?cursor=<urlsafe_next_cursor>
+    #         return 20 next greetings
+    #       return Http 404 if query error
 
     def get(self, request, *args, **kwargs):
         guestbook_name = kwargs['guestbook_name']
@@ -41,9 +41,10 @@ class Search(JSONResponseMixin, FormView):
             curs = Cursor(urlsafe=self.request.GET.get('cursor'))
         except datastore_errors.BadValueError:
             return HttpResponse(status=404)
-        items, nextcurs, more = Greeting.get_page(guestbook_name, 20, curs)
+        items, nextcurs, more = Greeting.get_page(guestbook_name, 10, curs)
         dict_item = [x.greeting_to_dict() for x in items]
         context = {}
+        context["is_admin"] = users.is_current_user_admin()
         context["guestbook_name"] = guestbook_name
         context["greetings"] = dict_item
         context["more"] = more
@@ -51,27 +52,36 @@ class Search(JSONResponseMixin, FormView):
             context["cursor"] = nextcurs.urlsafe()
         context["count"] = len(items)
         return self.render_to_response(context)
-# POST /api/guestbook/<guestbook_name>/greeting
-#
-#     Create new greeting
-#     Successful return Http 204
-#     Fail return Http 404
-#     Form invalid return Http 400
+    # POST /api/guestbook/<guestbook_name>/greeting
+    #
+    #     Create new greeting
+    #     Successful return Http 204
+    #     Fail return Http 404
+    #     Form invalid return Http 400
 
     form_class = ApiForm
+
+    def post(self, request, *args, **kwargs):
+        #<bound method QueryDict.get of <QueryDict: {}>
+        logging.warning(request.body)
+        #If request.POST is null -> request.Post = request.body to dict
+        if not request.POST:
+            request.POST = json.loads(request.body)
+        content = request.POST.get('content')
+        return super(Search, self).post(request, args, kwargs)
 
     def form_invalid(self, form):
         return HttpResponse(status=400)
 
     def form_valid(self, form):
-        guestbook_name = self.kwargs('guestbook_name')
+        guestbook_name = self.kwargs['guestbook_name']
         myguestbook = Guestbook(name=guestbook_name)
         content = self.request.POST.get('content')
         if users.get_current_user():
             author = users.get_current_user().nickname()
         else:
             author = None
-        if Greeting(parent=myguestbook.get_key(), author=author, content=content):
+        if myguestbook.put_greeting(author, content):
             return HttpResponse(status=204)
         else:
             return HttpResponse(status=404)
@@ -87,10 +97,10 @@ class SearchID(JSONResponseMixin, FormView):
 
     form_class = ApiForm
 
-# GET /api/guestbook/<guestbook_name>/greeting/<id>
-#
-#     return JSON: greeting id, content, date, updated_by, updated_date, guestbook_name
-#     return Http 404 if cannot retrieve
+    # GET /api/guestbook/<guestbook_name>/greeting/<id>
+    #
+    #     return JSON: greeting id, content, date, updated_by, updated_date, guestbook_name
+    #     return Http 404 if cannot retrieve
 
     def get(self, request, *args, **kwargs):
         guestbook_name = kwargs['guestbook_name']
@@ -106,17 +116,26 @@ class SearchID(JSONResponseMixin, FormView):
         else:
             return HttpResponse(status=404)
 
-# PUT /api/guestbook/<guestbook_name>/greeting/<id>
-#
-#     update date greeting via parameters same as POST
-#     Successful return Http 204
-#     Fail return Http 404
-#     Form invalid return Http 400
-#
+        # PUT /api/guestbook/<guestbook_name>/greeting/<id>
+        #
+        #     update date greeting via parameters same as POST
+        #     Successful return Http 204
+        #     Fail return Http 404
+        #     Form invalid return Http 400
+        #
+    # PUT is a valid HTTP verb for creating (with a known URL) or editing an
+    # object, note that browsers only support POST for now.
+
+    def put(self, request, *args, **kwargs):
+        #If request.POST is null -> request.Post = request.body to dict
+        if not request.POST:
+            request.POST = json.loads(request.body)
+        return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        guestbook_name = self.kwargs('guestbook_name')
-        id = self.kwargs('id')
+        self.request.POST = json.loads(self.request.body)
+        guestbook_name = self.kwargs['guestbook_name']
+        id = self.kwargs['id']
         content = self.request.POST.get('content')
         myguestbook = Guestbook(name=guestbook_name)
         greeting = myguestbook.get_greeting_by_id(id)
@@ -128,14 +147,13 @@ class SearchID(JSONResponseMixin, FormView):
             return HttpResponse(status=404)
 
     def form_invalid(self, form):
-
         return HttpResponse(status=400)
 
-# DELETE /api/guestbook/<guestbook_name>/greeting/<id>
-#
-#     delete greeting
-#     Successful return Http 204
-#     Fail return Http 404
+    # DELETE /api/guestbook/<guestbook_name>/greeting/<id>
+    #
+    #     delete greeting
+    #     Successful return Http 204
+    #     Fail return Http 404
 
     def delete(self, request, *args, **kwargs):
         guestbook_name = kwargs['guestbook_name']
