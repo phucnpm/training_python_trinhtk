@@ -40,6 +40,7 @@ define([
         id_greeting : "",
         disabled: "",
         hidden : "none",
+        avatar: require.toUrl("guestbook/widget/images/defaultAvatar.jpg"),
         postCreate: function(){
             var domNode = this.domNode;
             this.inherited(arguments);
@@ -120,6 +121,13 @@ define([
                 alert("You don't have permisson to update this greeting!!")
             }
 
+        },
+
+        _setAvatarAttr: function(imagePath) {
+            if (imagePath != "") {
+                this._set("avatar", imagePath);
+                this.avatarNode.src = imagePath;
+            }
         }
 
     });

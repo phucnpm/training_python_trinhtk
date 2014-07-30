@@ -33,18 +33,29 @@ define([
 
         _signclick: function(evt){
             text = this.contentNode.value;
-            evt.stopPropagation();
-            evt.preventDefault();
-            request.post("/api/guestbook/"+this.guestbook+"/greeting/", {
-                data:{
-                    content: text
-                },
-                headers:{
-                    "X-CSRFToken": cookie('csrftoken')
-                },
-                timeout : 1000
-            });
-            this._loadgreeting(this.guestbook, 500);
+            if (text.length > 10){
+                alert("Max length = 10!!!");
+            }
+            else {
+                if (text.length == 0){
+                    alert("This field is required!");
+                }
+                else{
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                    request.post("/api/guestbook/"+this.guestbook+"/greeting/", {
+                        data:{
+                            content: text
+                        },
+                        headers:{
+                            "X-CSRFToken": cookie('csrftoken')
+                        },
+                        timeout : 1000
+                    });
+                    this._loadgreeting(this.guestbook, 500);
+                }
+            }
+
         },
 
         _switchclick: function(){
