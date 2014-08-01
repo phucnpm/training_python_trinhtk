@@ -10,7 +10,7 @@
         data-dojo-type="dijit/InlineEditBox"
         data-dojo-props="
             editor:'dijit/form/ValidationTextBox',
-            autoSave: false, ${disabled}
+            autoSave: false, disabled:  true,
             editorParams: {required:'true', maxLength: '10'}">${content}</p>
     <span>Edited by: ${updated_by}</span> at <span class="date"> ${date_modified}</span><br/>
     <button data-dojo-type="dijit/form/Button"

@@ -31,12 +31,14 @@ define([
         guestbook_name : "",
         is_author : false,
         id_greeting : "",
-        disabled: "",
         avatar: require.toUrl("guestbook/widget/images/defaultAvatar.jpg"),
 
         postCreate: function(){
             if(this.is_admin){
                 domStyle.set(this.deleteButtonNode.domNode, 'visibility', 'visible');
+            }
+            if(this.is_admin || this.is_author) {
+                this.contentNode.set('disabled', false)
             }
             this.inherited(arguments);
             var domNode = this.domNode;
@@ -47,16 +49,6 @@ define([
                 on(domNode, mouse.enter, lang.hitch(this, "_changeBackground", this.mouseBackgroundColor)),
                 on(domNode, mouse.leave, lang.hitch(this, "_changeBackground", this.baseBackgroundColor))
             );
-        },
-
-        buildRendering: function(){
-            console.log("BUILD RENDERING");
-            if(this.is_admin || this.is_author){
-                this.disabled = "disabled: false,"
-            }
-            else
-                this.disabled = "disabled: true,";
-            this.inherited(arguments);
         },
 
         _guestbook: function(){

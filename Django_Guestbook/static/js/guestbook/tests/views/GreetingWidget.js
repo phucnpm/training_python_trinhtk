@@ -3,8 +3,9 @@ define([
     'dojo/json',
     'dojo/dom',
     '../sinon',
+    'dojo/dom-attr',
     '../../widget/GreetingWidget'
-], function(doh, json, dom, sinon, GreetingWidget){
+], function(doh, json, dom, sinon, domAttr, GreetingWidget){
     doh.register('guestbook.widget.GreetingWidget', {
             name : "Show_button_delete_when_admin_logged_in",
             setUp: function(){
@@ -35,9 +36,8 @@ define([
             runTest: function(){
                 var greeting = {'is_admin': 'true'};
                 this.GreetingWidget = new GreetingWidget(greeting);
-                obj = this;
-                var contentNode_disabled= obj.GreetingWidget.disabled;
-                doh.is(contentNode_disabled, "disabled: false,");
+                var contentNode_disabled= domAttr.get(this.GreetingWidget.contentNode, "disabled");
+                doh.is(contentNode_disabled,  false);
             },
             timeout: 5000
         }
@@ -55,8 +55,8 @@ define([
                 var deferred = new doh.Deferred();
                 this.GreetingWidget = new GreetingWidget(greeting);
                 obj = this;
-                var contentNode_disabled= obj.GreetingWidget.disabled;
-                doh.is(contentNode_disabled, "disabled: false,");
+                var contentNode_disabled= domAttr.get(this.GreetingWidget.contentNode, "disabled");
+                doh.is(contentNode_disabled,  false);
             },
             timeout: 5000
         }
