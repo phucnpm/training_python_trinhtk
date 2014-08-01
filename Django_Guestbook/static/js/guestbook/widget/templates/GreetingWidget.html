@@ -1,9 +1,20 @@
 <div>
-    <img  data-dojo-attach-point="avatarNode" class="${baseClass}Avatar" src="${avatar}">
+    <img  data-dojo-attach-point="avatarNode"
+          class="${baseClass}Avatar"
+          src="${avatar}">
     <b><span data-dojo-attach-point="authorNode">${author} </span></b>
-    wrote at <span data-dojo-attach-point="pub_date" class="date">${!pub_date}</span>:
-    <p  data-dojo-attach-point="contentNode" class="content" data-dojo-type="dijit/InlineEditBox" data-dojo-props=" editor:'dijit/form/ValidationTextBox', autoSave: false, ${disabled} editorParams: {required:'true', maxLength: '10'}">${content}</p>
+    wrote at <span data-dojo-attach-point="pub_date"
+                   class="date">${!pub_date}</span>:
+    <p  data-dojo-attach-point="contentNode"
+        class="content"
+        data-dojo-type="dijit/InlineEditBox"
+        data-dojo-props="
+            editor:'dijit/form/ValidationTextBox',
+            autoSave: false, ${disabled}
+            editorParams: {required:'true', maxLength: '10'}">${content}</p>
     <span>Edited by: ${updated_by}</span> at <span class="date"> ${date_modified}</span><br/>
-    <button data-dojo-type="dijit/form/Button" data-dojo-attach-point="deleteButtonNode" style="display: inline; visibility: hidden" value="Delete"> Delete </button>
+    <button data-dojo-type="dijit/form/Button"
+            data-dojo-attach-point="deleteButtonNode"
+            style="display: inline; visibility: hidden" value="Delete"> Delete </button>
     <br/>
 </div>

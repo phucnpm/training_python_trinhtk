@@ -38,9 +38,15 @@ define([
 
         getGreetings: function(guestBookName, cursor){
             this.set('guestBookName', guestBookName);
-            return this.store.query({
-                cursor: cursor
-            })
+            if(cursor == "None"){
+                return this.store.query();
+            }
+            else{
+                return this.store.query({
+                    cursor: cursor
+                })
+            }
+
         },
 
         deleteGreeting: function(greetingId, guestBookName){

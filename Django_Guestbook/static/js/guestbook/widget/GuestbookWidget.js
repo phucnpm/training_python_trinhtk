@@ -19,24 +19,29 @@ define([
         templateString: template,
         baseClass: "GuestbookWidget",
         store : null,
-
-        constructor : function(name){
+        autoload : true,
+        constructor : function(name, autoload){
             this.inherited(arguments);
+            this.guestbook = name;
+            this.autoload = autoload;
             this.store = new GreetingStore();
         },
 
-        _signclick: function(evt){
+        _signclick: function(){
             text = this.contentNode.value;
             if (text.length > 10){
                 alert("Max length = 10!!!");
+                return -1;
             }
             else {
                 if (text.length == 0){
                     alert("This field is required!");
+                    return 0;
                 }
                 else{
                     this._addgreeting();
                     this._loadgreeting(this.guestbook, 500);
+                    return 1;
                 }
             }
 
@@ -48,28 +53,36 @@ define([
         },
 
         _loadgreeting: function(guestbook, time){
-            var start = new Date().getTime();
-            while (new Date().getTime() < start + time);
-            this.greetingListNode.innerHTML = "";
+            if (this.autoload){
+                var start = new Date().getTime();
+                while (new Date().getTime() < start + time);
+                this.greetingListNode.innerHTML = "";
+                console.log("INSIDE LOAD GREETING");
+                var greetingContainer = this.greetingListNode;
 
-            this.store.getGreetings(this.guestbook).then(
-                function(data){
-                    var greetingContainer = this.greetingListNode;
-                    var newDocFrag = document.createDocumentFragment();
-                    var arraywidget = [];
-                    arrayUtil.forEach(data.greetings, function(greeting){
-                        console.log(greeting);
-                        greeting.is_admin = data.is_admin;
-                        greeting.guestbook_name = data.guestbook_name;
-                        var widget = new GreetingWidget(greeting);
-                        widget.placeAt(newDocFrag);
-                        arraywidget.push(widget);
-                    });
-                    domConstruct.place(newDocFrag, greetingContainer);
-                    arrayUtil.forEach(arraywidget, function(widget){
-                       widget.startup();
-                });
-            });
+                this.store.getGreetings(this.guestbook).then(
+                    function(data){
+                        var newDocFrag = document.createDocumentFragment();
+                        var arraywidget = [];
+                        arrayUtil.forEach(data.greetings, function(greeting){
+                            greeting.is_admin = data.is_admin;
+                            greeting.guestbook_name = data.guestbook_name;
+                            var widget = new GreetingWidget(greeting);
+                            widget.placeAt(newDocFrag);
+                            arraywidget.push(widget);
+                        });
+                        domConstruct.place(newDocFrag, greetingContainer);
+                        console.log("load xong cmnr");
+                        arrayUtil.forEach(arraywidget, function(widget){
+                            widget.startup();
+                        });
+                    },
+                    function(error){
+                        alert("ERROR!");
+                    }
+                );
+
+            }
         },
 
         _addgreeting: function(){
