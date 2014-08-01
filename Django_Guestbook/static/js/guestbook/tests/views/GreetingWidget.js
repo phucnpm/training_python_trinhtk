@@ -14,15 +14,12 @@ define([
                 this.GreetingWidget.destroy();
             },
             runTest: function(){
+                var greeting = {'is_admin': 'true'};
                 var deferred = new doh.Deferred();
-                this.GreetingWidget = new GreetingWidget(true, false);//Fake is admin
+                this.GreetingWidget = new GreetingWidget(greeting);
                 obj = this;
-                setTimeout(deferred.getTestCallback(function(){
-                    var deleteButtonNode_style_visibility = obj.GreetingWidget.deleteButtonNode.domNode.style.visibility;
-                    console.log(deleteButtonNode_style_visibility);
-                    doh.is(deleteButtonNode_style_visibility, "visible");
-                }), 100 );
-                return deferred;
+                var deleteButtonNode_style_visibility = obj.GreetingWidget.deleteButtonNode.domNode.style.visibility;
+                doh.is(deleteButtonNode_style_visibility, "visible");
             },
             timeout: 5000
         }
@@ -36,15 +33,11 @@ define([
                 this.GreetingWidget.destroy();
             },
             runTest: function(){
-                var deferred = new doh.Deferred();
-                this.GreetingWidget = new GreetingWidget(true, false);//Fake is admin
+                var greeting = {'is_admin': 'true'};
+                this.GreetingWidget = new GreetingWidget(greeting);
                 obj = this;
-                setTimeout(deferred.getTestCallback(function(){
-                    var contentNode_disabled= obj.GreetingWidget.disabled;
-                    console.log(contentNode_disabled);
-                    doh.is(contentNode_disabled, "disabled: false,");
-                }), 100 );
-                return deferred;
+                var contentNode_disabled= obj.GreetingWidget.disabled;
+                doh.is(contentNode_disabled, "disabled: false,");
             },
             timeout: 5000
         }
@@ -58,15 +51,12 @@ define([
                 this.GreetingWidget.destroy();
             },
             runTest: function(){
+                var greeting = {'is_author': 'true'};
                 var deferred = new doh.Deferred();
-                this.GreetingWidget = new GreetingWidget(false, true);//Fake is author
+                this.GreetingWidget = new GreetingWidget(greeting);
                 obj = this;
-                setTimeout(deferred.getTestCallback(function(){
-                    var contentNode_disabled= obj.GreetingWidget.disabled;
-                    console.log(contentNode_disabled);
-                    doh.is(contentNode_disabled, "disabled: false,");
-                }), 100 );
-                return deferred;
+                var contentNode_disabled= obj.GreetingWidget.disabled;
+                doh.is(contentNode_disabled, "disabled: false,");
             },
             timeout: 5000
         }

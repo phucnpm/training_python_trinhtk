@@ -34,11 +34,6 @@ define([
         disabled: "",
         avatar: require.toUrl("guestbook/widget/images/defaultAvatar.jpg"),
 
-        constructor: function(admin, author){
-            this.is_admin = admin;
-            this.is_author = author;
-        },
-
         postCreate: function(){
             if(this.is_admin){
                 domStyle.set(this.deleteButtonNode.domNode, 'visibility', 'visible');
