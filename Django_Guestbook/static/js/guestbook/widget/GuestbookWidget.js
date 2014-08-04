@@ -20,12 +20,6 @@ define([
         baseClass: "GuestbookWidget",
         store : null,
         autoload : true,
-        constructor : function(name, autoload){
-            this.inherited(arguments);
-            this.guestbook = name;
-            this.autoload = autoload;
-            this.store = new GreetingStore();
-        },
 
         _signclick: function(){
             text = this.contentNode.value;
@@ -99,6 +93,7 @@ define([
 
         postCreate: function(){
             this.inherited(arguments);
+            this.store = new GreetingStore();
             this._loadgreeting(this.guestbook, 0);
             this.guestbookNode.value = this.guestbook;
             this.own(

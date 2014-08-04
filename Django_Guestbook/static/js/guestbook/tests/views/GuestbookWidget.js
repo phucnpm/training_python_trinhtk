@@ -16,7 +16,7 @@ define([
             },
             runTest: function(){
                 var deferred = new doh.Deferred();
-                this.guestbookwidget = new GuestbookWidget("default_guestbook", true);
+                this.guestbookwidget = new GuestbookWidget();
                 obj = this;
                 setTimeout(deferred.getTestCallback(function(){
                     var greetingContainer = obj.guestbookwidget.greetingListNode;
@@ -37,7 +37,7 @@ define([
             },
             runTest: function(){
                 var deferred = new doh.Deferred();
-                this.guestbookwidget = new GuestbookWidget("default_guestbook", false);
+                this.guestbookwidget = new GuestbookWidget();
                 var spy = sinon.spy(this.guestbookwidget, "_signclick");
                 obj = this;
                 setTimeout(deferred.getTestCallback(function(){
@@ -59,7 +59,7 @@ define([
             },
             runTest: function(){
                 var deferred = new doh.Deferred();
-                this.guestbookwidget = new GuestbookWidget("default_guestbook", false);
+                this.guestbookwidget = new GuestbookWidget();
                 var spy = sinon.spy(this.guestbookwidget, "_switchclick");
                 obj = this;
                 setTimeout(deferred.getTestCallback(function(){
