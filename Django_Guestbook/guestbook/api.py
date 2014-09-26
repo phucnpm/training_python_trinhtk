@@ -13,6 +13,7 @@ from guestbook.forms import ApiForm
 from guestbook.models import Guestbook, Greeting
 import json
 
+
 class JSONResponseMixin(object):
 
     def render_to_response(self, context):
@@ -30,7 +31,8 @@ class JSONResponseMixin(object):
 class Search(JSONResponseMixin, FormView):
     #       GET /api/guestbook/<guestbook_name>/greeting
     #
-    #  return JSON: guestbookname as STRING, more as BOOL, next_cursor as STRING, 20 lastest greetings
+    #  return JSON: guestbookname as STRING, more as BOOL, next_cursor as STRING,
+    #  20 lastest greetings
     #       GET /api/guestbook/<guestbook_name>/greeting?cursor=<urlsafe_next_cursor>
     #         return 20 next greetings
     #       return Http 404 if query error
@@ -65,8 +67,7 @@ class Search(JSONResponseMixin, FormView):
         #<bound method QueryDict.get of <QueryDict: {}>
         logging.warning(request.body)
         #If request.POST is null -> request.Post = request.body to dict
-        if not request.POST:
-            request.POST = json.loads(request.body)
+        request.POST = json.loads(request.body)
         content = request.POST.get('content')
         return super(Search, self).post(request, args, kwargs)
 
@@ -128,8 +129,7 @@ class SearchID(JSONResponseMixin, FormView):
 
     def put(self, request, *args, **kwargs):
         #If request.POST is null -> request.Post = request.body to dict
-        if not request.POST:
-            request.POST = json.loads(request.body)
+        request.POST = json.loads(request.body)
         return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):

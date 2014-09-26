@@ -24,7 +24,6 @@ define([
             this.watch('guestBookName', function(name, oldValue, value){
                 if(oldValue != value)
                 {
-                    console.log('guestBookName changed');
                     var url = "/api/guestbook/"+value+"/greeting/";
                     this.store = new JsonRest({
                         target: url,
@@ -38,9 +37,15 @@ define([
 
         getGreetings: function(guestBookName, cursor){
             this.set('guestBookName', guestBookName);
-            return this.store.query({
-                cursor: cursor
-            })
+            if(!cursor){
+                return this.store.query();
+            }
+            else{
+                return this.store.query({
+                    cursor: cursor
+                })
+            }
+
         },
 
         deleteGreeting: function(greetingId, guestBookName){
