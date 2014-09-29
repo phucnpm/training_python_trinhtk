@@ -1,74 +1,79 @@
 define([
-    'dojo/cookie',
-    'dojo/dom',
-    'dojo/_base/declare',
-    'dojo/store/JsonRest',
-    'dojo/Stateful'
+	'dojo/cookie',
+	'dojo/dom',
+	'dojo/_base/declare',
+	'dojo/store/JsonRest',
+	'dojo/Stateful'
 ], function(cookie, dom, declare, JsonRest, Stateful) {
-    return declare([Stateful], {
-        guestBookName: '',
-        store: null,
+	return declare([Stateful], {
+		guestBookName: '',
+		store: null,
 
-        _guestBookNameGetter: function(){
-            return this.guestBookName;
-        },
+		_guestBookNameGetter: function(){
+			return this.guestBookName;
+		},
 
-        _guestBookNameSetter: function(value){
-            this.guestBookName = value;
-        },
+		_guestBookNameSetter: function(value){
+			this.guestBookName = value;
+		},
 
-        constructor: function(){
-            this.inherited(arguments);
+		constructor: function(){
+			this.inherited(arguments);
 
-            // update target when guestBookName change
-            this.watch('guestBookName', function(name, oldValue, value){
-                if(oldValue != value)
-                {
-                    var url = "/api/guestbook/"+value+"/greeting/";
-                    this.store = new JsonRest({
-                        target: url,
-                        headers: {
-                            "X-CSRFToken": cookie("csrftoken")
-                        }
-                    });
-                }
-            });
-        },
+			// update target when guestBookName change
+			this.watch('guestBookName', function(name, oldValue, value){
+				if(oldValue != value)
+				{
+					var url = "/api/guestbook/"+value+"/greeting/";
+					this.store = new JsonRest({
+						target: url,
+						headers: {
+							"X-CSRFToken": cookie("csrftoken")
+						}
+					});
+				}
+			});
+		},
 
-        getGreetings: function(guestBookName, cursor){
-            this.set('guestBookName', guestBookName);
-            if(!cursor){
-                return this.store.query();
-            }
-            else{
-                return this.store.query({
-                    cursor: cursor
-                })
-            }
+		getGreetings: function(guestBookName, cursor){
+			this.set('guestBookName', guestBookName);
+			if(!cursor){
+				return this.store.query();
+			}
+			else{
+				return this.store.query({
+					cursor: cursor
+				})
+			}
 
-        },
+		},
 
-        deleteGreeting: function(greetingId, guestBookName){
-            this.set('guestBookName', guestBookName);
-            return this.store.remove(greetingId);
-        },
+		getGreeting: function(id, guestBookName){
+			this.set('guestBookName', guestBookName);
+			return this.store.query(id);
+		},
 
-        addGreeting: function(greetingContent, guestBookName){
-            this.set('guestBookName', guestBookName);
-            greeting = {
-                content: greetingContent
-            };
-            return this.store.add(greeting);
-        },
+		deleteGreeting: function(greetingId, guestBookName){
+			this.set('guestBookName', guestBookName);
+			return this.store.remove(greetingId);
+		},
 
-        updateGreeting: function(greetingId, greetingContent, guestBookName){
-            this.set('guestBookName', guestBookName);
-            greeting = {
-                id: greetingId,
-                content: greetingContent,
-                guestbook_name: guestBookName
-            };
-            return this.store.put(greeting);
-        }
-    });
+		addGreeting: function(greetingContent, guestBookName){
+			this.set('guestBookName', guestBookName);
+			greeting = {
+				content: greetingContent
+			};
+			return this.store.add(greeting);
+		},
+
+		updateGreeting: function(greetingId, greetingContent, guestBookName){
+			this.set('guestBookName', guestBookName);
+			greeting = {
+				id: greetingId,
+				content: greetingContent,
+				guestbook_name: guestBookName
+			};
+			return this.store.put(greeting);
+		}
+	});
 });

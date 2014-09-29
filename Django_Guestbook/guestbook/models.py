@@ -92,7 +92,7 @@ class Guestbook(ndb.Model):
                                       'author': None,
                                       'content': content})
             memcache.delete("%s:greetings" % self.name)
-            return True
+            return greeting.key.id()
         return False
     @ndb.transactional
     def delete_greeting(self, id):
