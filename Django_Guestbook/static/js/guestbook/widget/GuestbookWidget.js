@@ -11,22 +11,27 @@ define([
 	"dijit/form/Button",
 	"dijit/form/ValidationTextBox",
 	'./_ViewBaseMixin',
+	'../common/views/_ListViewMixin',
 	'dojo/router',
 	'dojo/dom-style',
 	"dojo/hash",
 	"dojo/topic",
 	"dojo/dom-attr",
+	'dojo/_base/Deferred',
 	"dojo/text!./templates/GuestbookWidget.html"
 ], function(declare, lang, on, arrayUtil, GreetingWidget, GreetingStore,
-			dom, cookie, domConstruct, button, validationtextbox,_ViewBaseMixin, router, domStyle, hash, topic, domAttr, template){
+			dom, cookie, domConstruct, button, validationtextbox,_ViewBaseMixin, _ListViewMixin, router, domStyle, hash, topic, domAttr, Deferred, template){
 	//Show greetings
 
-	return declare("app.FirstWidget",[_ViewBaseMixin], {
+	return declare("app.FirstWidget",[_ListViewMixin], {
 		guestbook : "default_guestbook",
 		templateString: template,
 		baseClass: "GuestbookWidget",
 		store : null,
 		autoload : true,
+		autoPaging: 10,
+		cursor: null,
+		_showedCount: 0,
 
 		_signclick: function(){
 			text = this.contentNode.value;
@@ -49,8 +54,10 @@ define([
 		},
 
 		_switchclick: function(){
+			this.greetingListNode.innerHTML = "";
+			this.cursor = null;
 			this.guestbook = this.guestbookNode.value;
-			this._loadgreeting(this.guestbook, 0);
+			this.loadItems({forceNew: true});
 		},
 
 		_loadgreeting: function(guestbook, time){
@@ -160,18 +167,60 @@ define([
 			hash((location.hash || lastPage), true);
 		},
 
-		postCreate: function(){
+		fetchItems: function(options, cursor){
+			var items = this.store.getGreetings(this.guestbook, cursor),
+				greeting_list = items.greetings;
+				arrayUtil.forEach(greeting_list, function(greeting){
+								greeting.is_admin = data.is_admin;
+								greeting.guestbook_name = data.guestbook_name;
+							});
+			return items;
+		},
+
+		getItemView: function(greeting) {
+			return new GreetingWidget(greeting);
+		},
+
+		loadItems: function(options) {
+			// Override
+			this._showedCount = 1;
+			var options = options || {},
+				forceNew = options.forceNew || false;
+			options.limit = options.limit || 10;
+			options.offset = options.offset || 0;
+
+			return Deferred.when(this.fetchItems(options, this.cursor), lang.hitch(this, function(items) {
+				if (items.greetings && items.greetings.length === options.limit) {
+					this.set('pagingOption', {
+						'limit': options.limit,
+						'offset': options.offset + options.limit
+					});
+					this.cursor = items.cursor;
+				}
+				this.set('lastItems', items.greetings);
+			}));
+		},
+
+		onShow: function() {
 			this.inherited(arguments);
-			domStyle.set(dom.byId("idGreeting"), "display", "none");
-			domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
+			if (!(this._showedCount++)) {
+				this.loadItems();
+			}
+		},
+
+		postCreate: function(){
 			this.store = new GreetingStore();
 			this.guestbookNode.value = this.guestbook;
-			this._loadgreeting(this.guestbook, 0);
+			this.inherited(arguments);
+			console.log("postCreate GuestbookWidget");
+			domStyle.set(dom.byId("idGreeting"), "display", "none");
+			domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
 			this.route();
 			this.own(
 					on(this.signButtonNode,"click", lang.hitch(this, "_signclick")),
 					on(this.switchButtonNode,"click", lang.hitch(this, "_switchclick"))
 			);
+
 		}
 	});
 });
