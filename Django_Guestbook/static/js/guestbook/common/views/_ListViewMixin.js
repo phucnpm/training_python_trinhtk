@@ -12,10 +12,9 @@ define([
 	'dojo/query',
 	'dojo/NodeList-manipulate',
 	'dijit/registry',
-	'../../models/QueryData',
 	'../../widget/_ViewBaseMixin'
 ], function(declare, lang, array, win, Deferred, on, dom, domClass, domConstruct,
-		domGeometry, query, NodeList_manipulate, registry, QueryData, _ViewBaseMixin) {
+		domGeometry, query, NodeList_manipulate, registry, _ViewBaseMixin) {
 
 	return declare(_ViewBaseMixin, {
 		// autoLoad: Boolean
@@ -80,29 +79,6 @@ define([
 
 		loadItems: function(options) {
 
-			var forceNew = options && options.forceNew;
-			return Deferred.when(this.fetchItems(options), lang.hitch(this, function(items) {
-				var item, queryData, totalItems;
-				if (items.length) {
-					// FIXME: Ugly (See also: _StoreBase)
-					item = items[0];
-					console.log(item);
-					queryData = item.get('queryData');
-					console.log(queryData);
-					if (queryData) {
-						queryData = new QueryData(queryData);
-						this.set('pagingOption', queryData.getNextQueryOption());
-						totalItems = queryData.get('totalItems');
-					}
-				}
-
-				if (forceNew) {
-					this.destroyDescendants();
-				}
-
-				this.set('totalItems', totalItems || 0);
-				this.set('lastItems', items);
-			}));
 		},
 
 		render: function(items) {
