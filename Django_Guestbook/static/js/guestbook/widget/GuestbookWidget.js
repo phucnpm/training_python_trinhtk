@@ -167,8 +167,8 @@ define([
 			hash((location.hash || lastPage), true);
 		},
 
-		fetchItems: function(options, cursor){
-			var items = this.store.getGreetings(this.guestbook, cursor),
+		fetchItems: function(options){
+			var items = this.store.getGreetings(this.guestbook, options.cursor),
 				greeting_list = items.greetings;
 				arrayUtil.forEach(greeting_list, function(greeting){
 								greeting.is_admin = data.is_admin;
@@ -185,27 +185,22 @@ define([
 			// Override
 			this._showedCount = 1;
 			var options = options || {},
+				guestbookWidget = this,
 				forceNew = options.forceNew || false;
 			options.limit = options.limit || 10;
 			options.offset = options.offset || 0;
+			options.cursor = guestbookWidget.cursor;
 
-			return Deferred.when(this.fetchItems(options, this.cursor), lang.hitch(this, function(items) {
+			return Deferred.when(this.fetchItems(options), lang.hitch(this, function(items) {
 				if (items.greetings && items.greetings.length === options.limit) {
 					this.set('pagingOption', {
 						'limit': options.limit,
 						'offset': options.offset + options.limit
 					});
-					this.cursor = items.cursor;
+					guestbookWidget.cursor = items.cursor;
 				}
 				this.set('lastItems', items.greetings);
 			}));
-		},
-
-		onShow: function() {
-			this.inherited(arguments);
-			if (!(this._showedCount++)) {
-				this.loadItems();
-			}
 		},
 
 		postCreate: function(){
