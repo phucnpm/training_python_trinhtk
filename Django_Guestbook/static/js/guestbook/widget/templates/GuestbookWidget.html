@@ -1,5 +1,6 @@
 
 <div>
+	<div id="idPost">
     <b>Update status:</b><br />
     <input  data-dojo-attach-point="contentNode"
             id="content" class="valid"
@@ -14,14 +15,23 @@
             id="signButton" data-dojo-type="dijit/form/Button"
             value="Post" style="float: right"> Post Status </button>
     <br/>
-    <b>Guestbook:</b>
+	</div>
+
+
+    <div id="idGreeting"><b>News feed:</b><div data-dojo-attach-point="greetingListNode"
+                               id="greetingListNode"
+                               class="GreetingWidget"></div></div>
+	<div id="idGreetingDetails"><b>Greeting's detail:</b>
+		<div data-dojo-attach-point="greetingDetailsNode"
+                               id="greetingDetailsNode"
+                               class="GreetingWidget"></div>
+	</div>
+	<b>Guestbook:</b>
     <input data-dojo-attach-point="guestbookNode"
            value="" id="txtGuestbook_name" name="guestbook_name">
     <button data-dojo-type="dijit/form/Button"
             data-dojo-attach-point="switchButtonNode"
             id="switchButton"
             value="Switch Guestbook"> Switch Guestbook </button>
-    <div><b>News feed:</b><div data-dojo-attach-point="greetingListNode"
-                               id="greetingListNode"
-                               class="GreetingWidget"></div></div>
 </div>
+

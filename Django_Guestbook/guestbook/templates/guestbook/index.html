@@ -8,6 +8,10 @@
 </head>
 <body>
 {% csrf_token %}
+        <ul id="menu">
+            <li><a href="new.php">Sign new greeting</a></li>
+            <li><a href="posts.php">List greeting</a></li>
+        </ul>
 <span id="guestbook" data-dojo-type="app.FirstWidget"data-dojo-props="guestbook:'default_guestbook'"></span>
 <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js"
         data-dojo-config="async: true,
