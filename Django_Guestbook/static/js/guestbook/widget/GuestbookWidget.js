@@ -63,7 +63,9 @@ define([
 			if (this.autoload){
 				var start = new Date().getTime();
 				while (new Date().getTime() < start + time);
-				this.greetingListNode.innerHTML = "";
+				while (this.greetingListNode.firstChild) {
+					this.greetingListNode.removeChild(this.greetingListNode.firstChild);
+				}
 				this.cursor = null;
 				this.guestbook = this.guestbookNode.value;
 				this.loadItems({forceNew: true});
@@ -156,8 +158,6 @@ define([
 				guestbookWidget = this,
 				forceNew = options.forceNew || false;
 			options.limit = options.limit || 10;
-			options.cursor = guestbookWidget.cursor;
-
 			return Deferred.when(this.fetchItems(options), lang.hitch(this, function(items) {
 				if (items.greetings && items.greetings.length === options.limit) {
 					arrayUtil.forEach(items.greetings, function(greeting){
@@ -165,7 +165,8 @@ define([
 						greeting.guestbook_name = items.guestbook_name;
 					});
 					this.set('pagingOption', {
-						'limit': options.limit
+						'limit': options.limit,
+						'cursor': guestbookWidget.cursor
 					});
 					guestbookWidget.cursor = items.cursor;
 				}
