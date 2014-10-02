@@ -137,7 +137,7 @@ define([
 		},
 
 		fetchItems: function(options){
-			var items = this.store.getGreetings(this.guestbook, options.cursor),
+			var items = this.store.getGreetings(this.guestbook, options.cursor, options.limit),
 				greeting_list = items.greetings;
 			arrayUtil.forEach(greeting_list, function(greeting){
 								greeting.is_admin = items.is_admin;

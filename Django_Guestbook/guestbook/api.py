@@ -42,9 +42,10 @@ class Search(JSONResponseMixin, FormView):
 		guestbook_name = kwargs['guestbook_name']
 		try:
 			curs = Cursor(urlsafe=self.request.GET.get('cursor'))
+			lim = int(self.request.GET.get('limit'))
 		except datastore_errors.BadValueError:
 			return HttpResponse(status=404)
-		items, nextcurs, more = Greeting.get_page(guestbook_name, 10, curs)
+		items, nextcurs, more = Greeting.get_page(guestbook_name, lim, curs)
 		count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).count()
 		dict_item = [x.greeting_to_dict() for x in items]
 		context = {}

@@ -35,14 +35,17 @@ define([
 			});
 		},
 
-		getGreetings: function(guestBookName, cursor){
+		getGreetings: function(guestBookName, cursor, limit){
 			this.set('guestBookName', guestBookName);
 			if(!cursor){
-				return this.store.query();
+				return this.store.query({
+					limit: limit
+				});
 			}
 			else{
 				return this.store.query({
-					cursor: cursor
+					cursor: cursor,
+					limit : limit
 				})
 			}
 
