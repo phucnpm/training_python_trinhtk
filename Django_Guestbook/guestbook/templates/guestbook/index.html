@@ -21,8 +21,11 @@
 <script type="text/javascript">
     require([
         "guestbook/widget/GuestbookWidget",
-        "dojo/domReady!"
-    ]);
+        "dojo/domReady!",
+        "guestbook/app"
+    ], function(GuestbookWidget, domReady, app){
+		app();
+	});
 </script>
 <a class="link" href="{{ url }}">{{ url_linktext }}</a>
 

@@ -48,9 +48,6 @@ class Search(JSONResponseMixin, FormView):
 		count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).count()
 		dict_item = [x.greeting_to_dict() for x in items]
 		context = {}
-		context.update({
-			'nextLink': None, 'prevLink': None,
-		})
 		context["is_admin"] = users.is_current_user_admin()
 		context["guestbook_name"] = guestbook_name
 		context["greetings"] = dict_item
