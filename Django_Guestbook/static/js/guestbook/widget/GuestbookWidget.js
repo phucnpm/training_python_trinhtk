@@ -63,9 +63,6 @@ define([
 			if (this.autoload){
 				var start = new Date().getTime();
 				while (new Date().getTime() < start + time);
-				while (this.greetingListNode.firstChild) {
-					this.greetingListNode.removeChild(this.greetingListNode.firstChild);
-				}
 				this.cursor = null;
 				this.guestbook = this.guestbookNode.value;
 				this.loadItems({forceNew: true});
@@ -158,6 +155,12 @@ define([
 				guestbookWidget = this,
 				forceNew = options.forceNew || false;
 			options.limit = options.limit || 10;
+			if(forceNew){
+				while (this.greetingListNode.firstChild) {
+					this.greetingListNode.removeChild(this.greetingListNode.firstChild);
+				}
+				this.clearItems();
+			}
 			return Deferred.when(this.fetchItems(options), lang.hitch(this, function(items) {
 				if (items.greetings && items.greetings.length === options.limit) {
 					arrayUtil.forEach(items.greetings, function(greeting){

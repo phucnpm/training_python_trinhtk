@@ -171,7 +171,6 @@ define([
 		},
 
 		clearItems: function() {
-			this.destroyDescendants();
 			this.set('pagingOption', null);
 		}
 	});
