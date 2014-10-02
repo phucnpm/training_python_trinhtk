@@ -55,6 +55,7 @@ class Search(JSONResponseMixin, FormView):
 		context["more"] = more
 		if more:
 			context["cursor"] = nextcurs.urlsafe()
+		context['itemLoaded'] = len(items)
 		context["totalItems"] = count
 		return self.render_to_response(context)
 	# POST /api/guestbook/<guestbook_name>/greeting

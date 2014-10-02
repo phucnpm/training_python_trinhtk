@@ -32,8 +32,8 @@ define([
 		store : null,
 		autoload : true,
 		autoPaging: 10,
-		cursor: null,
 		model : app,
+		itemLoaded: 0,
 
 		_signclick: function(){
 			text = this.contentNode.value;
@@ -60,6 +60,7 @@ define([
 		},
 
 		_loadgreeting: function(guestbook, time){
+			this.itemLoaded = 0;
 			if (this.autoload){
 				var start = new Date().getTime();
 				while (new Date().getTime() < start + time);
@@ -154,8 +155,9 @@ define([
 			var options = options || {},
 				guestbookWidget = this,
 				forceNew = options.forceNew || false;
-			options.limit = options.limit || 10;
-			if(forceNew){
+			options.limit = options.limit || 20;
+//			options.cursor = guestbookWidget.cursor;
+			if (forceNew){
 				while (this.greetingListNode.firstChild) {
 					this.greetingListNode.removeChild(this.greetingListNode.firstChild);
 				}
@@ -167,13 +169,21 @@ define([
 						greeting.is_admin = items.is_admin;
 						greeting.guestbook_name = items.guestbook_name;
 					});
-					this.set('pagingOption', {
-						'limit': options.limit,
-						'cursor': guestbookWidget.cursor
-					});
-					guestbookWidget.cursor = items.cursor;
+					if (items.more){
+						this.set('pagingOption', {
+							'limit': options.limit,
+							'cursor': items.cursor
+						});
+					}
+					else{
+						this.set('pagingOption', null);
+					}
+//					guestbookWidget.cursor = items.cursor;
 				}
+				this.itemLoaded += items.itemLoaded;
 				this.set('lastItems', items.greetings);
+				this.set('totalItems', items.totalItems);
+				this.itemLoadedNode.innerHTML = this.itemLoaded;
 			}));
 		},
 
