@@ -22,8 +22,10 @@
     require([
         "guestbook/widget/GuestbookWidget",
         "dojo/domReady!",
-        "guestbook/app"
-    ], function(GuestbookWidget, domReady, app){
+        "guestbook/app",
+        "dojo/parser"
+    ], function(GuestbookWidget, domReady, app, parser){
+		parser.parse();
 		app();
 	});
 </script>

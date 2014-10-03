@@ -13,21 +13,21 @@ define([
 ], function(lang, config, parser, ready, hash, ioQuery, router, dom, domAttr, on, app) {
 
 	router.register('posts', function(evt) {
-		app.router = 'posts';
+		app.set('router', 'posts');
 	});
 
 	router.register('new', function(evt) {
-		app.router = 'new';
+		app.set('router', 'new');
 	});
 
 	router.register('post/:id', function(evt) {
-		app.router = 'postsDetail';
-		app.idGreeting = evt.params.id;
+		app.set('router', 'postsDetail');
+		app.set('idGreeting', evt.params.id);
 	});
 
 	return function() {
 		var prefix = '!',
-			default_page = "posts";
+				default_page = "posts";
 		ready(function() {
 			if (!config.parseOnLoad) {
 				parser.parse();
@@ -38,7 +38,9 @@ define([
 				var page = domAttr.get(this, "href").replace(".php", "");
 				router.go(page);
 			});
-			hash((location.hash || default_page), true);
+			if (!hash() || !(app.get('router'))) {
+				app.set('router', default_page);
+			}
 		});
 	};
 });
