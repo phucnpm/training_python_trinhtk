@@ -43,10 +43,15 @@ class Search(JSONResponseMixin, FormView):
 		try:
 			curs = Cursor(urlsafe=self.request.GET.get('cursor'))
 			lim = int(self.request.GET.get('limit'))
+			key_search = self.request.GET.get('keySearch')
 		except datastore_errors.BadValueError:
 			return HttpResponse(status=404)
-		items, nextcurs, more = Greeting.get_page(guestbook_name, lim, curs)
-		count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).count()
+		items, nextcurs, more = Greeting.get_page(guestbook_name, lim, curs, key_search)
+		if not key_search:
+			count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).count()
+		else:
+			count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).\
+				filter(Greeting.content == key_search).count()
 		dict_item = [x.greeting_to_dict() for x in items]
 		context = {}
 		context["is_admin"] = users.is_current_user_admin()

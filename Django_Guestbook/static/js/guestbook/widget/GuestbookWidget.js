@@ -35,8 +35,10 @@ define([
 		autoPaging: 10,
 		model : app,
 		itemLoaded: 0,
+		keySearch: null,
 
 		_signclick: function(){
+			this.keySearch = null;
 			text = this.contentNode.value;
 			if (text.length > 10){
 				alert("Max length = 10!!!");
@@ -49,25 +51,31 @@ define([
 				}
 				else{
 					this._addgreeting();
-					this._loadgreeting(this.guestbook, 500);
+					this._loadgreeting(this.guestbook, 500, {forceNew: true});
 					return 1;
 				}
 			}
 
 		},
 
-		_switchclick: function(){
-			this._loadgreeting(this.guestbook, 0);
+		_searchclick: function(){
+			this.keySearch = this.searchNode.value;
+			this._loadgreeting(this.guestbook, 0, {forceNew: true, keySearch: this.keySearch});
 		},
 
-		_loadgreeting: function(guestbook, time){
+		_switchclick: function(){
+			this.keySearch = null;
+			this._loadgreeting(this.guestbook, 0, {forceNew: true});
+		},
+
+		_loadgreeting: function(guestbook, time, option){
 			this.itemLoaded = 0;
 			if (this.autoload){
 				var start = new Date().getTime();
 				while (new Date().getTime() < start + time);
 				this.cursor = null;
 				this.guestbook = this.guestbookNode.value;
-				this.loadItems({forceNew: true});
+				this.loadItems(option);
 			}
 		},
 
@@ -138,7 +146,7 @@ define([
 		},
 
 		fetchItems: function(options){
-			var items = this.store.getGreetings(this.guestbook, options.cursor, options.limit),
+			var items = this.store.getGreetings(this.guestbook, options.cursor, options.limit, options.keySearch),
 				greeting_list = items.greetings;
 			arrayUtil.forEach(greeting_list, function(greeting){
 								greeting.is_admin = items.is_admin;
@@ -157,7 +165,7 @@ define([
 				guestbookWidget = this,
 				forceNew = options.forceNew || false;
 			options.limit = options.limit || 20;
-//			options.cursor = guestbookWidget.cursor;
+			options.keySearch = guestbookWidget.keySearch;
 			if (forceNew){
 				while (this.greetingListNode.firstChild) {
 					this.greetingListNode.removeChild(this.greetingListNode.firstChild);
@@ -205,7 +213,8 @@ define([
 			domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
 			this.own(
 					on(this.signButtonNode,"click", lang.hitch(this, "_signclick")),
-					on(this.switchButtonNode,"click", lang.hitch(this, "_switchclick"))
+					on(this.switchButtonNode,"click", lang.hitch(this, "_switchclick")),
+					on(this.searchButtonNode,"click", lang.hitch(this, "_searchclick"))
 			);
 			this._watch(this.model, 'router', function(name, oldValue, value) {
 					this.generate(value);

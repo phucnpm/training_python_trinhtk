@@ -39,15 +39,21 @@ class Greeting(ndb.Model):
         return dict
 
     @classmethod
-    def get_page(cls, guestbook_name, pagesize, cursor=None):
+    def get_page(cls, guestbook_name, pagesize, cursor=None, key_search=None):
         if pagesize <= 0:
             items = None
             nextcurs = None
             more = None
         try:
-            items, nextcurs, more = Greeting.query(
-                ancestor=ndb.Key(Guestbook, guestbook_name)) \
-                .order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
+            if not key_search:
+                items, nextcurs, more = Greeting.query(
+                    ancestor=ndb.Key(Guestbook, guestbook_name)) \
+                    .order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
+            else:
+                items, nextcurs, more = Greeting.query(
+                    ancestor=ndb.Key(Guestbook, guestbook_name)) \
+                    .filter(Greeting.content == key_search)\
+                    .order(-Greeting.date).fetch_page(pagesize, start_cursor=cursor)
         except:
             items = None
             nextcurs = None

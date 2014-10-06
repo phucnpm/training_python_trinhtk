@@ -2,6 +2,13 @@
 <div>
 	Items loaded:<span data-dojo-attach-point="itemLoadedNode"></span>
 	Total items:<span data-dojo-attach-point="countNode"></span>
+	<div style="float: right">
+    <input data-dojo-attach-point="searchNode"
+           value="" >
+    <button data-dojo-type="dijit/form/Button"
+            data-dojo-attach-point="searchButtonNode"
+            value="Search">&nbsp;Search&nbsp;</button>
+	</div>
 	<div id="idPost">
 
     <b>Update status:</b><br />
@@ -16,7 +23,7 @@
     <br />
     <button data-dojo-attach-point="signButtonNode"
             id="signButton" data-dojo-type="dijit/form/Button"
-            value="Post" style="float: right"> Post Status </button>
+            value="Post" style="float: right">&nbsp;Post Status&nbsp;</button>
     <br/>
 	</div>
 
