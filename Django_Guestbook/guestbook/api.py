@@ -46,7 +46,7 @@ class Search(JSONResponseMixin, FormView):
 		except datastore_errors.BadValueError:
 			return HttpResponse(status=404)
 		items, nextcurs, more = Greeting.get_page(guestbook_name, lim, curs)
-		count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).order(-Greeting.date).count()
+		count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).count()
 		dict_item = [x.greeting_to_dict() for x in items]
 		context = {}
 		context["is_admin"] = users.is_current_user_admin()

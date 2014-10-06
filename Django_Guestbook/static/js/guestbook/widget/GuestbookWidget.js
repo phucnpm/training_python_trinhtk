@@ -17,12 +17,13 @@ define([
 	"dojo/hash",
 	"dojo/topic",
 	"dojo/dom-attr",
+	'dojo/query',
 	'dojo/_base/Deferred',
 	'../models/app',
 	"dojo/text!./templates/GuestbookWidget.html"
 ], function(declare, lang, on, arrayUtil, GreetingWidget, GreetingStore,
 			dom, cookie, domConstruct, button, validationtextbox,_ViewBaseMixin,
-			_ListViewMixin, router, domStyle, hash, topic, domAttr, Deferred, app, template){
+			_ListViewMixin, router, domStyle, hash, topic, domAttr, query, Deferred, app, template){
 	//Show greetings
 
 	return declare("app.FirstWidget",[_ListViewMixin], {
@@ -183,8 +184,15 @@ define([
 				this.itemLoaded += items.itemLoaded;
 				this.set('lastItems', items.greetings);
 				this.set('totalItems', items.totalItems);
-				this.itemLoadedNode.innerHTML = this.itemLoaded;
+				this.renderCountLoaded(this.itemLoaded);
 			}));
+		},
+
+		renderCountLoaded : function(count){
+			var guestbook = this;
+			if (guestbook.itemLoadedNode) {
+				query(guestbook.itemLoadedNode).text(count);
+			}
 		},
 
 		postCreate: function(){
