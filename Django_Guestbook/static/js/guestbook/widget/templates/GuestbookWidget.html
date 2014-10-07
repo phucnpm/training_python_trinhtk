@@ -1,6 +1,9 @@
 
 <div>
+	Items loaded:<span data-dojo-attach-point="itemLoadedNode"></span>
+	Total items:<span data-dojo-attach-point="countNode"></span>
 	<div id="idPost">
+
     <b>Update status:</b><br />
     <input  data-dojo-attach-point="contentNode"
             id="content" class="valid"
@@ -18,14 +21,17 @@
 	</div>
 
 
-    <div id="idGreeting"><b>News feed:</b><div data-dojo-attach-point="greetingListNode"
+    <div id="idGreeting"><b>News feed:</b>
+		<div data-dojo-attach-point="greetingListNode"
                                id="greetingListNode"
-                               class="GreetingWidget"></div></div>
+                               class="GreetingWidget"  data-dojo-attach-point="scrollNode" style="height: 500px; overflow-y:auto;"></div>
+		</div>
 	<div id="idGreetingDetails"><b>Greeting's detail:</b>
 		<div data-dojo-attach-point="greetingDetailsNode"
                                id="greetingDetailsNode"
                                class="GreetingWidget"></div>
 	</div>
+
 	<b>Guestbook:</b>
     <input data-dojo-attach-point="guestbookNode"
            value="" id="txtGuestbook_name" name="guestbook_name">

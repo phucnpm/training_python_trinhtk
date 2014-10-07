@@ -11,22 +11,30 @@ define([
 	"dijit/form/Button",
 	"dijit/form/ValidationTextBox",
 	'./_ViewBaseMixin',
+	'../common/views/_ListViewMixin',
 	'dojo/router',
 	'dojo/dom-style',
 	"dojo/hash",
 	"dojo/topic",
 	"dojo/dom-attr",
+	'dojo/query',
+	'dojo/_base/Deferred',
+	'../models/app',
 	"dojo/text!./templates/GuestbookWidget.html"
 ], function(declare, lang, on, arrayUtil, GreetingWidget, GreetingStore,
-			dom, cookie, domConstruct, button, validationtextbox,_ViewBaseMixin, router, domStyle, hash, topic, domAttr, template){
+			dom, cookie, domConstruct, button, validationtextbox,_ViewBaseMixin,
+			_ListViewMixin, router, domStyle, hash, topic, domAttr, query, Deferred, app, template){
 	//Show greetings
 
-	return declare("app.FirstWidget",[_ViewBaseMixin], {
+	return declare("app.FirstWidget",[_ListViewMixin], {
 		guestbook : "default_guestbook",
 		templateString: template,
 		baseClass: "GuestbookWidget",
 		store : null,
 		autoload : true,
+		autoPaging: 10,
+		model : app,
+		itemLoaded: 0,
 
 		_signclick: function(){
 			text = this.contentNode.value;
@@ -49,39 +57,17 @@ define([
 		},
 
 		_switchclick: function(){
-			this.guestbook = this.guestbookNode.value;
 			this._loadgreeting(this.guestbook, 0);
 		},
 
 		_loadgreeting: function(guestbook, time){
+			this.itemLoaded = 0;
 			if (this.autoload){
 				var start = new Date().getTime();
 				while (new Date().getTime() < start + time);
-				this.greetingListNode.innerHTML = "";
-				console.log("INSIDE LOAD GREETING");
-				var greetingContainer = this.greetingListNode;
-
-				this.store.getGreetings(this.guestbook).then(
-						function(data){
-							var newDocFrag = document.createDocumentFragment();
-							var arraywidget = [];
-							arrayUtil.forEach(data.greetings, function(greeting){
-								greeting.is_admin = data.is_admin;
-								greeting.guestbook_name = data.guestbook_name;
-								var widget = new GreetingWidget(greeting);
-								widget.placeAt(newDocFrag);
-								arraywidget.push(widget);
-							});
-							domConstruct.place(newDocFrag, greetingContainer);
-							arrayUtil.forEach(arraywidget, function(widget){
-								widget.startup();
-							});
-						},
-						function(error){
-							alert("ERROR!");
-						}
-				);
-
+				this.cursor = null;
+				this.guestbook = this.guestbookNode.value;
+				this.loadItems({forceNew: true});
 			}
 		},
 
@@ -128,50 +114,102 @@ define([
 			this.store.updateGreeting(greetingId, greetingContent, this.guestbook)
 		},
 
-		route: function(){
-			var prefix = '!',
-				guestbook = this,
-				lastPage = "posts";
-			router.register("posts", function(evt){
-				domStyle.set(dom.byId("idPost"), "display", "none");
-				domStyle.set(dom.byId("idGreeting"), "display", "block");
-				domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
+		generate: function(value){
+			var guestbook = this;
+			switch (value) {
+				case 'posts':
+					domStyle.set(dom.byId("idPost"), "display", "none");
+					domStyle.set(dom.byId("idGreeting"), "display", "block");
+					domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
+					break;
+				case 'new':
+					domStyle.set(dom.byId("idPost"), "display", "block");
+					domStyle.set(dom.byId("idGreeting"), "display", "none");
+					domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
+					break;
+				case 'postsDetail':
+					guestbook._watch(this.model, 'idGreeting', function(name, oldValue, value) {
+						guestbook.loaddetailgreeting(value, guestbook.guestbook, 0);
+					});
+					domStyle.set(dom.byId("idPost"), "display", "none");
+					domStyle.set(dom.byId("idGreeting"), "display", "none");
+					domStyle.set(dom.byId("idGreetingDetails"), "display", "block");
+			}
+		},
 
-			});
-			//Show post area
-			router.register("new", function(evt){
-				domStyle.set(dom.byId("idPost"), "display", "block");
-				domStyle.set(dom.byId("idGreeting"), "display", "none");
-				domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
-			});
-			//Show post detail
-			router.register("post/:id", function(evt){
-				guestbook.loaddetailgreeting(evt.params.id, guestbook.guestbook, 0);
-				domStyle.set(dom.byId("idPost"), "display", "none");
-				domStyle.set(dom.byId("idGreeting"), "display", "none");
-				domStyle.set(dom.byId("idGreetingDetails"), "display", "block");
-			});
-			router.startup();
-			on(dom.byId("menu"), "a:click", function(event){
-				event.preventDefault();
-				var page = domAttr.get(this, "href").replace(".php", "");
-				router.go(page);
-			});
-			hash((location.hash || lastPage), true);
+		fetchItems: function(options){
+			var items = this.store.getGreetings(this.guestbook, options.cursor, options.limit),
+				greeting_list = items.greetings;
+			arrayUtil.forEach(greeting_list, function(greeting){
+								greeting.is_admin = items.is_admin;
+								greeting.guestbook_name = items.guestbook_name;
+							});
+			return items;
+		},
+
+		getItemView: function(greeting) {
+			return new GreetingWidget(greeting);
+		},
+
+		loadItems: function(options) {
+			// Override
+			var options = options || {},
+				guestbookWidget = this,
+				forceNew = options.forceNew || false;
+			options.limit = options.limit || 20;
+//			options.cursor = guestbookWidget.cursor;
+			if (forceNew){
+				while (this.greetingListNode.firstChild) {
+					this.greetingListNode.removeChild(this.greetingListNode.firstChild);
+				}
+				this.clearItems();
+			}
+			return Deferred.when(this.fetchItems(options), lang.hitch(this, function(items) {
+				if (items.greetings && items.greetings.length === options.limit) {
+					arrayUtil.forEach(items.greetings, function(greeting){
+						greeting.is_admin = items.is_admin;
+						greeting.guestbook_name = items.guestbook_name;
+					});
+					if (items.more){
+						this.set('pagingOption', {
+							'limit': options.limit,
+							'cursor': items.cursor
+						});
+					}
+					else{
+						this.set('pagingOption', null);
+					}
+//					guestbookWidget.cursor = items.cursor;
+				}
+				this.itemLoaded += items.itemLoaded;
+				this.set('lastItems', items.greetings);
+				this.set('totalItems', items.totalItems);
+				this.renderCountLoaded(this.itemLoaded);
+			}));
+		},
+
+		renderCountLoaded : function(count){
+			var guestbook = this;
+			if (guestbook.itemLoadedNode) {
+				query(guestbook.itemLoadedNode).text(count);
+			}
 		},
 
 		postCreate: function(){
-			this.inherited(arguments);
-			domStyle.set(dom.byId("idGreeting"), "display", "none");
-			domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
 			this.store = new GreetingStore();
 			this.guestbookNode.value = this.guestbook;
-			this._loadgreeting(this.guestbook, 0);
-			this.route();
+			this.inherited(arguments);
+			console.log("postCreate GuestbookWidget");
+			console.log(this.model);
+			domStyle.set(dom.byId("idGreeting"), "display", "none");
+			domStyle.set(dom.byId("idGreetingDetails"), "display", "none");
 			this.own(
 					on(this.signButtonNode,"click", lang.hitch(this, "_signclick")),
 					on(this.switchButtonNode,"click", lang.hitch(this, "_switchclick"))
 			);
+			this._watch(this.model, 'router', function(name, oldValue, value) {
+					this.generate(value);
+			});
 		}
 	});
 });

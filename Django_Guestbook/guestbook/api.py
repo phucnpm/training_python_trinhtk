@@ -5,6 +5,7 @@ from google.appengine.datastore.datastore_query import Cursor
 from django.views.generic.edit import FormView
 from google.appengine.api import datastore_errors
 from google.appengine.api import users
+from google.appengine.ext import ndb
 try:
 	from google.appengine.api.labs import taskqueue
 except ImportError:
@@ -41,9 +42,11 @@ class Search(JSONResponseMixin, FormView):
 		guestbook_name = kwargs['guestbook_name']
 		try:
 			curs = Cursor(urlsafe=self.request.GET.get('cursor'))
+			lim = int(self.request.GET.get('limit'))
 		except datastore_errors.BadValueError:
 			return HttpResponse(status=404)
-		items, nextcurs, more = Greeting.get_page(guestbook_name, 10, curs)
+		items, nextcurs, more = Greeting.get_page(guestbook_name, lim, curs)
+		count = Greeting.query(ancestor=ndb.Key(Guestbook, guestbook_name)).count()
 		dict_item = [x.greeting_to_dict() for x in items]
 		context = {}
 		context["is_admin"] = users.is_current_user_admin()
@@ -52,7 +55,8 @@ class Search(JSONResponseMixin, FormView):
 		context["more"] = more
 		if more:
 			context["cursor"] = nextcurs.urlsafe()
-		context["count"] = len(items)
+		context['itemLoaded'] = len(items)
+		context["totalItems"] = count
 		return self.render_to_response(context)
 	# POST /api/guestbook/<guestbook_name>/greeting
 	#
