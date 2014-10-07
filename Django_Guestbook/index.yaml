@@ -13,5 +13,12 @@ indexes:
 - kind: Greeting
   ancestor: yes
   properties:
+  - name: content
+  - name: date
+    direction: desc
+
+- kind: Greeting
+  ancestor: yes
+  properties:
   - name: date
     direction: desc
